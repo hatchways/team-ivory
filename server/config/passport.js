@@ -1,8 +1,8 @@
-import passport from 'passport';
 import LocalStrategy from 'passport-local';
+import bcrypt from 'bcrypt';
 
 // Load User model
-//TODO
+import User from '../models/Users';
 
 module.exports = passport => {
 	// Configure the local strategy for use by Passport.
@@ -13,20 +13,45 @@ module.exports = passport => {
 	// will be set at `req.user` in route handlers after authentication.
 	passport.use(
 		new LocalStrategy.Strategy(function(username, password, done) {
-			console.log('Passport');
-			// Update the db to use the user model to query the db for the user
-			db.users.findByUsername(username, function(err, user) {
-				if (err) {
+			User.findOne({ where: { email: username } })
+				.then(async user => {
+					console.info('User found. Verifying password...');
+					// Verify password
+					if (
+						await bcrypt.compare(password, user.password.toString())
+					)
+						return done(null, user);
+
+					console.log(
+						`Wrong password:
+						${await bcrypt.compare(password, user.password.toString())}
+						"${password}"
+						 "${user.password.toString().trim()}"`
+					);
+
+					// No user/ no password match
+					return done(null, false, {
+						message:
+							'Please ensure the entered email and password are correct.',
+					});
+				})
+				.catch(err => {
+					// Server error
+					console.error('Error fetching user: ', err);
 					return done(err);
-				}
-				if (!user) {
-					return done(null, false);
-				}
-				if (user.password != password) {
-					return done(null, false);
-				}
-				return done(null, user);
-			});
+				});
 		})
 	);
+
+	passport.serializeUser(function(user, done) {
+		console.log('Serializing');
+		done(null, user.username);
+	});
+
+	passport.deserializeUser(function(id, done) {
+		console.log('deserializing');
+		User.findById(id, function(err, user) {
+			done(err, user);
+		});
+	});
 };
