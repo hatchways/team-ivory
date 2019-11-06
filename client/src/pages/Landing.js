@@ -14,6 +14,7 @@ const landinPageStyle = theme => ({
 
 class LandingPage extends Component {
   state = {
+    testUser: "Client did not fetch test user from database (check your code)",
     welcomeMessage: "Step 1: Run the server and refresh (not running)",
     step: 0
   };
@@ -26,7 +27,7 @@ class LandingPage extends Component {
         else throw Error("Couldn't connect to the server");
       })
       .then(res => {
-        this.setState({ welcomeMessage: res.welcomeMessage });
+        this.setState({ welcomeMessage: res.welcomeMessage, testUser: `Client fetched test user from database successfully: username: ${res.testUser.username}, name: ${res.testUser.firstName} ${res.testUser.lastName}`});
         this.incrementStep();
       })
       .catch(err => {
@@ -42,6 +43,7 @@ class LandingPage extends Component {
     const { classes } = this.props;
     return (
       <div className={classes.landingContainer}>
+        <Typography>{this.state.testUser}</Typography>
         <Typography>{this.state.welcomeMessage}</Typography>
         {this.state.step >= 1 && (
           <React.Fragment>
