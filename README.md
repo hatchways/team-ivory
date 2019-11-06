@@ -10,11 +10,11 @@ Enter into Postgres Client by typing `psql` into your terminal.
 In postgres, type in the following queries:
 > create user ivory with password 'hatchways';
 
-> create dabatase recipe_dev with owner ivory;
+> create database recipe_dev with owner ivory;
 
 Exit psql with `\q`
 
-If you have all the dependencies installed, run the following:
+If you have all the dependencies installed, run the following in the server folder:
 > npx sequelize db:migrate
 
 > npx sequelize db:seed:all
