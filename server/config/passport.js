@@ -1,8 +1,6 @@
 import LocalStrategy from 'passport-local';
 import bcrypt from 'bcrypt';
-
-// Load User model
-import User from '../models/Users';
+import db from '../models';
 
 module.exports = passport => {
 	// Configure the local strategy for use by Passport.
@@ -13,7 +11,9 @@ module.exports = passport => {
 	// will be set at `req.user` in route handlers after authentication.
 	passport.use(
 		new LocalStrategy.Strategy(function(username, password, done) {
-			User.findOne({ where: { email: username } })
+			// User.findOne({ where: { email: username } })
+			console.log(username, password);
+			db.users.findOne({ where: { email: username } })
 				.then(async user => {
 					console.info('User found. Verifying password...');
 					// Verify password

@@ -11,16 +11,17 @@ const landinPageStyle = theme => ({
 });
 
 class Signup extends Component {
-	state = { username: '', password: '', passwordConfirm: '', name: '' };
+	state = { username: '', password: '', passwordConfirm: '', first: '', last: '',
+		email: '',  };
 
 	async login(evt) {
 		// Prevent page reload
 		evt.preventDefault();
-		const { username, password, name, passwordConfirm } = this.state;
+		const { username, password, first, last, email, passwordConfirm } = this.state;
 		const res = await fetch('/signup', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ username, password, passwordConfirm, name }),
+			body: JSON.stringify({ username, password, first, last, email, passwordConfirm }),
 		}).catch(err => console.log(err));
 		const data = await res.json();
 		console.log(data);
@@ -32,13 +33,21 @@ class Signup extends Component {
 			<div className={classes.landingContainer}>
 				<form onSubmit={e => this.login(e)}>
 					<input
-						placeholder='name'
-						onChange={e => this.setState({ name: e.target.value })}
+						placeholder='username'
+						onChange={e => this.setState({ username: e.target.value })}
+					/>
+					<input
+						placeholder='first name'
+						onChange={e => this.setState({ first: e.target.value })}
+					/>
+					<input
+						placeholder='last name'
+						onChange={e => this.setState({ last: e.target.value })}
 					/>
 					<input
 						/*type='email'*/ placeholder='email'
 						onChange={e =>
-							this.setState({ username: e.target.value })
+							this.setState({ email: e.target.value })
 						}
 					/>
 					<input
