@@ -45,15 +45,32 @@ router.post("/recipes", imageUpload, async function (req, res, next) {
 
 //placeholder to check for recipe upload
 router.get("/recipes", function(req, res, next) {
-  const { recipeId } = req.query;
+  if('id' in req.query){
+    const { id } = req.query;
 
-  models.recipes.findOne({
-    where: {id: recipeId}
-  }).then((recipe)=>{
-    res.status(200).send({recipe: {
-      name: recipe.name,
-      imageUrl: recipe.image.replace('public', '')
-    }})
-  })
+    models.recipes.findOne({
+      where: {id: id}
+    }).then((recipe)=>{
+      res.status(200).send({recipe: {
+        name: recipe.name,
+        imageUrl: recipe.image.replace('public', '')
+      }})
+    })
+  }
+  else{
+    models.recipes.findAll().then((recipes)=>{
+      res.status(200).send(recipes.map((recipe)=>{
+        return {
+          user: recipe.userId,
+          name: recipe.name,
+          imageUrl: recipe.image.replace('public', ''),
+          steps: recipe.steps,
+          tags: recipe.tags,
+          created: recipe.createdAt,
+          ingredients: recipe.ingredients.map((ingredient)=>{return {ingredient: {label: ingredient}, quantity: 1, unit: 'cups'}})
+        }
+      }))
+    })
+  }
 })
 module.exports = router;

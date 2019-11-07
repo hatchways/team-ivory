@@ -44,8 +44,9 @@ export default function RecipeCard(props) {
   const handleExpandClick = () => {
     setExpanded(!expanded);
   };
+  console.log(props.className)
   return (
-    <Card className={classes.card} id={props.id}>
+    <Card className={classes.card+' '+props.className} id={props.id}>
       <CardHeader
         avatar={
           <Avatar aria-label="recipe" className={classes.avatar}>
