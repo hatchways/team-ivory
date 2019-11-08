@@ -167,14 +167,15 @@ class BuilderPage extends Component {
   }
 
   handlePost = () => {
+    console.log(this.state.ingredients)
     if(this.state.name != '' && this.state.ingredients.length && this.state.steps.length){
       let formData = new FormData()
       formData.append('name', this.state.name)
-      formData.append('ingredients', this.state.ingredients)
-      formData.append('steps', this.state.steps)
-      formData.append('tags', this.state.tags)
+      formData.append('ingredients', JSON.stringify(this.state.ingredients))
+      formData.append('steps', JSON.stringify(this.state.steps))//the formdata comma seperates so have to escape them
+      formData.append('tags', JSON.stringify(this.state.tags))
       formData.append('image', this.state.image)
-      fetch('/api/posts',{
+      fetch('/api/recipes',{
         method: 'post',
         body: formData
       })
