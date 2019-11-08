@@ -167,7 +167,6 @@ class BuilderPage extends Component {
   }
 
   handlePost = () => {
-    console.log(this.state.ingredients)
     if(this.state.name != '' && this.state.ingredients.length && this.state.steps.length){
       let formData = new FormData()
       formData.append('name', this.state.name)
