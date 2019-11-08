@@ -7,6 +7,7 @@ import passport from 'passport';
 
 import indexRouter from './routes/index';
 import pingRouter from './routes/ping';
+import userRouter from './routes/user';
 
 var app = express();
 
@@ -24,6 +25,7 @@ app.use(passport.initialize());
 
 app.use('/', indexRouter);
 app.use('/ping', pingRouter);
+app.use('/user', userRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
