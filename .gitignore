@@ -3,7 +3,6 @@
 # dependencies
 node_modules/
 
-
 # production
 /build/
 
@@ -18,6 +17,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Config data
+/server/config/privateData.js
 
 #TODO add .env to your gitignore
 /server/public/uploads/recipeImages
