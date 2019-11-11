@@ -19,12 +19,14 @@ function App() {
     <MuiThemeProvider theme={theme}>
       <BrowserRouter>
         <AppNavbar />
-        <Route exact path="/" component={LandingPage} />
-        <Route exact path="/builder" component={BuilderPage} />
-        <Route exact path="/feed" component={Feed} />
-        <Route exact path="/login" component={Login} />
-        <Route exact path="/signup" component={Signup} />
-        <Route exact path="/user" component={User} />
+        <div style={{marginTop: '4rem'}}>
+          <Route exact path="/" component={LandingPage} />
+          <Route exact path="/builder" component={BuilderPage} />
+          <Route exact path="/feed" component={Feed} />
+          <Route exact path="/login" component={Login} />
+          <Route exact path="/signup" component={Signup} />
+          <Route exact path="/user" component={User} />
+        </div>
       </BrowserRouter>
     </MuiThemeProvider>
   );
