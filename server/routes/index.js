@@ -37,30 +37,28 @@ router.post("/login", (req, res, next) => {
       // failureFlash: true,
       session: false
     },
-    async (err, user, info) => {
-      if (err)
-        res
-          .status(500)
-          .send({
-            message: "There was a server error processing your request."
-          });
-      else if (!user)
-        res
-          .status(400)
-          .send({
-            message: "Please ensure that the username and password are correct."
-          });
-      else {
-        // Token w/out expiry
-        const token = await jwt.sign(
-          { user: user.username, name: user.firstName },
-          secret
-        );
-        res.cookie("jwt", token);
-        res.status(200).send({ message: "Login ok." });
-      }
-    }
+    handleLogin
   )(req, res, next);
+
+  async function handleLogin(err, user, info) {
+    if (err)
+      res.status(500).send({
+        message: "There was a server error processing your request."
+      });
+    else if (!user)
+      res.status(400).send({
+        message: "Please ensure that the username and password are correct."
+      });
+    else {
+      // Token w/out expiry
+      const token = await jwt.sign(
+        { user: user.username, name: user.firstName },
+        secret
+      );
+      res.cookie("jwt", token);
+      res.status(200).send({ message: "Login ok." });
+    }
+  }
 });
 
 // Signup

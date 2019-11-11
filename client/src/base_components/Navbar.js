@@ -20,6 +20,11 @@ export default class AppNavbar extends Component {
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
+          <Nav>
+            <Link className="navLink" style={this.navlinkStyle} to="/feed">
+              Feed
+            </Link>
+          </Nav>
           <Nav className="mr-auto">
             {this.props.user ? (
               <SignedIn name={this.props.user.name} />

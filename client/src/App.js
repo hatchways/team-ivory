@@ -7,6 +7,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { theme } from "./themes/theme";
 import LandingPage from "./pages/Landing";
 import BuilderPage from "./pages/Builder";
+import Feed from "./base_components/Feed";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import User from "./pages/User";
@@ -42,21 +43,24 @@ class App extends Component {
       <MuiThemeProvider theme={theme}>
         <BrowserRouter>
           <AppNavbar user={user} logout={() => this.logout()} />
-          <Route exact path="/" component={LandingPage} />
-          <Route exact path="/builder" component={BuilderPage} />
-          <Route
-            exact
-            path="/login"
-            render={props => (
-              <Login {...props} updateUser={() => this.updateUser()} />
-            )}
-          />
-          <Route exact path="/signup" component={Signup} />
-          <Route
-            exact
-            path="/user"
-            render={props => <User {...props} logout={() => this.logout()} />}
-          />
+          <div style={{ marginTop: "4rem" }}>
+            <Route exact path="/" component={LandingPage} />
+            <Route exact path="/builder" component={BuilderPage} />
+            <Route exact path="/feed" component={Feed} />
+            <Route
+              exact
+              path="/login"
+              render={props => (
+                <Login {...props} updateUser={() => this.updateUser()} />
+              )}
+            />
+            <Route exact path="/signup" component={Signup} />
+            <Route
+              exact
+              path="/user"
+              render={props => <User {...props} logout={() => this.logout()} />}
+            />
+          </div>
         </BrowserRouter>
       </MuiThemeProvider>
     );
