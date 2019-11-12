@@ -12,7 +12,7 @@ export default class AppNavbar extends Component {
 
   render() {
     return (
-      <Navbar expand="lg" style={this.navbarStyle}>
+      <Navbar expand="lg" style={this.navbarStyle} fixed="top">
         <Navbar.Brand to="/">
           <Link className="navLink" style={this.navlinkStyle} to="/">
             Ingridify
