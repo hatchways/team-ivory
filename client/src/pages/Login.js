@@ -33,7 +33,10 @@ class Login extends Component {
     }).catch(err => console.log(err));
     const data = await res.json();
     console.log(data);
-    this.props.history.push("/user");
+    if (res.status === 200) {
+      this.props.updateUser();
+      this.props.history.push("/user");
+    }
   }
 
   render() {
@@ -43,7 +46,8 @@ class Login extends Component {
         <form className={classes.form} onSubmit={e => this.login(e)}>
           <input
             className={classes.formItem}
-            /*type='email'*/ placeholder="email"
+            type="email"
+            placeholder="email"
             onChange={e => this.setState({ username: e.target.value })}
           />
           <input
@@ -53,6 +57,7 @@ class Login extends Component {
             onChange={e => this.setState({ password: e.target.value })}
           />
           <input type="submit" />
+          <Link to="/signup">New? Signup here</Link>
         </form>
       </div>
     );

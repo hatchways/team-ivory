@@ -70,11 +70,6 @@ class Signup extends Component {
         <form className={classes.form} onSubmit={e => this.signup(e)}>
           <input
             className={classes.formItem}
-            placeholder="username"
-            onChange={e => this.setState({ username: e.target.value })}
-          />
-          <input
-            className={classes.formItem}
             placeholder="first name"
             onChange={e => this.setState({ first: e.target.value })}
           />
@@ -82,6 +77,11 @@ class Signup extends Component {
             className={classes.formItem}
             placeholder="last name"
             onChange={e => this.setState({ last: e.target.value })}
+          />
+          <input
+            className={classes.formItem}
+            placeholder="username"
+            onChange={e => this.setState({ username: e.target.value })}
           />
           <input
             className={classes.formItem}
@@ -101,6 +101,7 @@ class Signup extends Component {
             onChange={e => this.setState({ passwordConfirm: e.target.value })}
           />
           <input type="submit" />
+          <Link to="/login">Already have an account? Sign in here</Link>
         </form>
       </div>
     );

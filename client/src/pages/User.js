@@ -36,6 +36,7 @@ class User extends Component {
     console.info("Signing out...");
     const res = await fetch("/user/signout", { method: "POST" });
     console.log(await res.json());
+    this.props.logout();
     this.props.history.push("/login");
   }
 
