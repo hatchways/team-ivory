@@ -11,6 +11,7 @@ const secret = "5a4fs5mk45u.JN6s";
 
 router.get("/", ensureAuthenticated, (req, res, next) => {
   console.log("user base url");
+  console.log(req.params);
   console.log(res.user);
   models.users
     .findOne({ where: { username: res.user.user } })
@@ -20,6 +21,18 @@ router.get("/", ensureAuthenticated, (req, res, next) => {
       res.status(200).send({ username, firstName, lastName, email });
     });
   // res.status(200).send({});
+});
+
+router.get("/:username", (req, res, next) => {
+  console.log("User request");
+  console.log(req.params);
+  models.users
+    .findOne({ where: { username: req.params.username } })
+    .then(function(user) {
+      console.log(user.dataValues);
+      const { username, firstName, lastName, email } = user.dataValues;
+      res.status(200).send({ username, firstName, lastName, email });
+    });
 });
 
 router.post("/signout", (req, res, next) => {
