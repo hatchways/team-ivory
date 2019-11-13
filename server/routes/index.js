@@ -56,7 +56,7 @@ router.post("/login", (req, res, next) => {
         secret
       );
       res.cookie("jwt", token);
-      res.status(200).send({ message: "Login ok." });
+      res.status(200).send({ message: "Login ok.", username: user.username });
     }
   }
 });

@@ -35,7 +35,7 @@ class Login extends Component {
     console.log(data);
     if (res.status === 200) {
       this.props.updateUser();
-      this.props.history.push("/user");
+      this.props.history.push(`/user/${data.username}`);
     }
   }
 
