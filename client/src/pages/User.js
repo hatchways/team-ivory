@@ -6,21 +6,56 @@ import { withStyles } from "@material-ui/core/styles";
 const landinPageStyle = theme => ({
   landingContainer: {
     margin: theme.spacing.unit * 2
+  },
+  userCard: {
+    display: "flex",
+    border: "2px solid #000000",
+    "border-radius": "5px",
+    "box-shadow": "5px 6px 0px #E0E0E0",
+    margin: "20px",
+    padding: "10px"
+  },
+  userDetails: {
+    margin: "10px 30px"
+  },
+  profilePic: {
+    width: "150px",
+    height: "150px",
+    "border-radius": "50%",
+    border: "2px solid #000000"
+  },
+  userLinks: {
+    width: "100px",
+    display: "flex",
+    "flex-direction": "column"
   }
 });
 
 class User extends Component {
   state = {
     username: "",
-    password: "",
-    passwordConfirm: "",
     first: "",
     last: "",
     email: ""
   };
 
-  async componentDidMount() {
-    const res = await fetch("/user");
+  // Set up initial user
+  componentDidMount() {
+    this.requestUser();
+    console.log(this.props);
+  }
+
+  // Ensure user update if :user in url is updated
+  componentDidUpdate(lastProps) {
+    if (lastProps.location.pathname !== this.props.location.pathname) {
+      this.requestUser();
+    }
+  }
+
+  // Get the user from the url and request data from server
+  async requestUser() {
+    const urlUser = this.props.location.pathname.split("/").pop();
+    const res = await fetch("/user/" + urlUser);
     console.log(res);
     if (res.status >= 400 && res.status < 500) {
       return this.props.history.push("/login");
@@ -43,12 +78,39 @@ class User extends Component {
   render() {
     const { classes } = this.props;
     const { firstName, lastName, email, username } = this.state;
+    const urlUser = this.props.location.pathname.split("/").pop();
+    const { user } = this.props;
+    let ownProfile = false;
+    if (user && user.user == urlUser) {
+      ownProfile = true;
+    }
+    console.log(ownProfile);
     return (
       <div className={classes.landingContainer}>
-        <p>{`Hello, ${firstName} ${lastName}`}</p>
-        <p>{`Username: ${username}`}</p>
-        <p>{`Email: ${email}`}</p>
-        <button onClick={() => this.signout()}>Sign out</button>
+        <div className={classes.userCard}>
+          <div className={classes.profilePic}></div>
+          <div className={classes.userDetails}>
+            <h1>{`${firstName} ${lastName}`}</h1>
+            <label>{`@${username}`}</label>
+            <p>{`Email: ${email}`}</p>
+          </div>
+        </div>
+        {ownProfile ? (
+          <UserLinks classes={classes} signout={() => this.signout()} />
+        ) : null}
+      </div>
+    );
+  }
+}
+
+class UserLinks extends Component {
+  render() {
+    const { classes } = this.props;
+    return (
+      <div className={classes.userLinks}>
+        <button>Favorites</button>
+        <button>Basket</button>
+        <button onClick={this.props.signout}>Sign out</button>
       </div>
     );
   }

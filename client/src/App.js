@@ -23,7 +23,7 @@ class App extends Component {
   }
 
   updateUser() {
-    // If jwt cookie set, get user
+    // If jwt cookie set, get user from the cookie
     console.info("Updating user...");
     const jwt = Cookies.get("jwt");
     if (jwt) {
@@ -51,14 +51,20 @@ class App extends Component {
               exact
               path="/login"
               render={props => (
-                <Login {...props} updateUser={() => this.updateUser()} username={this.state} />
+                <Login
+                  {...props}
+                  updateUser={() => this.updateUser()}
+                  username={this.state}
+                />
               )}
             />
             <Route exact path="/signup" component={Signup} />
             <Route
               exact
               path={`/user/:username`}
-              render={props => <User {...props} logout={() => this.logout()} />}
+              render={props => (
+                <User {...props} user={user} logout={() => this.logout()} />
+              )}
             />
           </div>
         </BrowserRouter>
