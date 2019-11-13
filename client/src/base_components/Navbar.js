@@ -11,7 +11,6 @@ export default class AppNavbar extends Component {
   };
 
   render() {
-    console.log(this.props)
     return (
       <Navbar expand="lg" style={this.navbarStyle} fixed="top">
         <Navbar.Brand to="/">
@@ -47,7 +46,6 @@ export default class AppNavbar extends Component {
 
 class SignedIn extends Component {
   render() {
-    console.log('signedin', this.props)
     return (
       <React.Fragment>
         <Nav>
