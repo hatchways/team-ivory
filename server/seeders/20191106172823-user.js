@@ -8,7 +8,7 @@ module.exports = {
      firstName: "Team",
      lastName: "Ivory",
      email: "test@test.com",
-     password: "test",
+     password: "$2b$10$xJa4xYq7WvnA1d63TDSar.qPE87u21VXatJ8nHRi8g9HxTyWn7f56",
      createdAt: new Date(),
      updatedAt: new Date()
    }

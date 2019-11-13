@@ -27,7 +27,7 @@ export default class AppNavbar extends Component {
           </Nav>
           <Nav className="mr-auto">
             {this.props.user ? (
-              <SignedIn name={this.props.user.name} />
+              <SignedIn name={this.props.user.name} username={this.props.user.user} />
             ) : (
               <AnonUser />
             )}
@@ -63,7 +63,7 @@ class SignedIn extends Component {
           </Link>
         </Nav>
         <Nav>
-          <Link className="navLink" style={this.navlinkStyle} to="/user">
+          <Link className="navLink" style={this.navlinkStyle} to={`/user/${this.props.username}`}>
             {this.props.name}
           </Link>
         </Nav>
