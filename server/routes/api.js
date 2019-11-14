@@ -99,8 +99,11 @@ router.get('/recipes', function(req, res, next) {
 router.get('/recipes/:username', async (req, res, next) => {
   console.log('Getting user recipes');
   const username = req.params.username;
-  const user = (await models.users.findOne({ where: { username } })).dataValues;
-  if (!user) return res.send(400).send({ error: 'User does not exist' });
+  const fetchUser = await models.users.findOne({ where: { username } });
+  // Return error if request for user that does not exist
+  if (!fetchUser) return res.status(400).send({ error: 'User does not exist' });
+
+  const user = fetchUser.dataValues;
 
   models.recipes.findAll({ where: { userId: user.id } }).then(recipes => {
     res.status(200).send(

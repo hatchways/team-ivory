@@ -54,7 +54,7 @@ class User extends Component {
     this.getRecipes();
   }
 
-  // Ensure user update if :user in url is updated
+  // Ensure user update if ':user' in url is updated
   componentDidUpdate(lastProps) {
     if (lastProps.location.pathname !== this.props.location.pathname) {
       this.requestUser();
@@ -62,31 +62,24 @@ class User extends Component {
     }
   }
 
-  // Get the user from the url and request data from server
+  // Get user information
   async requestUser() {
     const urlUser = this.props.location.pathname.split('/').pop();
     const res = await fetch('/user/' + urlUser);
-    console.log(res);
-    if (res.status >= 400 && res.status < 500) {
-      return this.props.history.push('/login');
-    }
+
     if (res.status === 200) {
       const data = await res.json();
-      console.log(data);
       this.setState({ ...data });
     }
   }
 
+  // Get user's recipes
   async getRecipes() {
     const urlUser = this.props.location.pathname.split('/').pop();
     const res = await fetch('/api/recipes/' + urlUser);
-    console.log(res);
-    if (res.status >= 400 && res.status < 500) {
-      return this.props.history.push('/login');
-    }
+
     if (res.status === 200) {
       const data = await res.json();
-      console.log(data);
       this.setState({ recipes: data });
     }
   }
