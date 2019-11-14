@@ -95,4 +95,30 @@ router.get('/recipes', function(req, res, next) {
     });
   }
 });
+
+router.get('/recipes/:username', async (req, res, next) => {
+  console.log('Getting user recipes');
+  const username = req.params.username;
+  const user = (await models.users.findOne({ where: { username } })).dataValues;
+  if (!user) return res.send(400).send({ error: 'User does not exist' });
+
+  models.recipes.findAll({ where: { userId: user.id } }).then(recipes => {
+    res.status(200).send(
+      recipes.map(recipe => {
+        return {
+          user: recipe.userId,
+          name: recipe.name,
+          imageUrl: recipe.image.replace('public', ''),
+          steps: recipe.steps,
+          tags: recipe.tags,
+          created: recipe.createdAt,
+          ingredients: recipe.ingredients.map(ingredient => {
+            return { ingredient: { label: ingredient }, quantity: 1, unit: 'cups' };
+          }),
+        };
+      })
+    );
+  });
+});
+
 module.exports = router;
