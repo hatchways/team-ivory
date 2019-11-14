@@ -13,6 +13,8 @@ import Typography from '@material-ui/core/Typography';
 import { red } from '@material-ui/core/colors';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
+
 
 const useStyles = makeStyles(theme => ({
   card: {
@@ -44,7 +46,22 @@ export default function RecipeCard(props) {
   const handleExpandClick = () => {
     setExpanded(!expanded);
   };
-  console.log(props.className)
+
+  const handleAdToCart = () => {
+    fetch('api/cart', {
+        method: 'post',
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          recipeId: props.recipe.id
+        })
+    }).then((res)=>{
+        return res.json() 
+    }).then((cart)=>{
+        console.log(cart)
+    })
+  }
   return (
     <Card className={classes.card+' '+props.className} id={props.id}>
       <CardHeader
@@ -55,6 +72,11 @@ export default function RecipeCard(props) {
         }
         title={props.recipe.name}
         subheader="September 14, 2016"
+        action={
+          <IconButton aria-label="settings" onClick={handleAdToCart}>
+            <AddShoppingCartIcon />
+          </IconButton>
+        }
       />
       <CardMedia
         className={classes.media}

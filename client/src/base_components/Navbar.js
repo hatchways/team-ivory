@@ -24,7 +24,7 @@ export default class AppNavbar extends Component {
                             <Link className='navLink' style={this.navlinkStyle} to='/builder'>Builder</Link>
                         </Nav>
                         <Nav>
-                            <Link className='navLink' style={this.navlinkStyle} to='/feed'>Feed</Link>
+                            <Link className='navLink' style={this.navlinkStyle} to='/cart'>Cart</Link>
                         </Nav>
                     </Nav>
                     <Form inline>

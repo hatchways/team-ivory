@@ -1,8 +1,9 @@
 var express = require("express");
 var router = express.Router();
 var models  = require('../models');
-var multer  = require('multer')
+var multer  = require('multer');
 const path = require('path');
+const { ensureAuthenticated } = require("../config/auth");
 
 //image upload parameters for the recipe image
 var imageUpload = multer({storage: multer.diskStorage({
@@ -36,6 +37,14 @@ router.post("/recipes", imageUpload, async function (req, res, next) {
       createdAt: Date.now(),
       updatedAt: Date.now()
     }).then((newRecipe) => {
+      ingredients.map((ingredient)=>{
+        newRecipe.createIngredient({
+          name: ingredient.ingredient.label,
+          quantity: ingredient.quantity,
+          unit: ingredient.unit.value,
+          outsideId: ingredient.ingredient.value
+        })
+      })
       res.status(200).send({ response: `Successfully added recipe `, id: newRecipe.id });
     });
   })
@@ -58,18 +67,78 @@ router.get("/recipes", function(req, res, next) {
     })
   }
   else{
-    models.recipes.findAll().then((recipes)=>{
+    models.recipes.findAll({include: [models.ingredients]}).then((recipes)=>{
       res.status(200).send(recipes.map((recipe)=>{
+        console.log(recipe.ingredients)
         return {
+          id: recipe.id,
           user: recipe.userId,
           name: recipe.name,
           imageUrl: recipe.image.replace('public', ''),
           steps: recipe.steps,
           tags: recipe.tags,
           created: recipe.createdAt,
-          ingredients: recipe.ingredients.map((ingredient)=>{return {ingredient: {label: ingredient}, quantity: 1, unit: 'cups'}})
+          ingredients: recipe.ingredients.map((ingredient)=>{return {ingredient: {label: ingredient.name}, quantity: ingredient.quantity, unit: {label: ingredient.unit}}})
         }
       }))
+    });
+  }
+});
+
+router.post('/cart',ensureAuthenticated, function(req, res, next){
+  models.recipes.findOne({where: {id: req.body.recipeId}, include: [models.ingredients]}).then((recipe)=>{
+    models.users.findOne({where:{username: res.user.user}}).then((user)=>{
+      models.shoppingCart.findOrCreate({where: {userId:user.id}, defaults: {status: 'open'}, include:[{model: models.ingredients, as: 'ingredients'}]}).then((carts)=>{
+        Promise.all(recipe.ingredients.map((ingredient)=>{
+          if(!carts[0].ingredients.map((ingredient)=>{return ingredient.outsideId}).includes(ingredient.outsideId)){
+            models.ingredientCart.create({
+              ingredientId: ingredient.id,
+              cartId: carts[0].id
+            })
+          }
+        })).then(()=>{
+          res.status(200).send({response: 'Successfully added to cart', cartId: carts[0].id})
+        })
+      })
+    })
+  })
+})
+
+router.get('/cart', ensureAuthenticated, function(req, res, next){
+  models.users.findOne({where:{username: res.user.user}}).then((user)=>{
+    models.shoppingCart.findOrCreate({where: {userId:user.id}, defaults: {status: 'open'}, include:[{model: models.ingredients, as: 'ingredients'}]}).then((carts)=>{
+      res.status(200).send({ingredients: carts[0].ingredients.map((ingredient)=>{ return {name: ingredient.name, outsideId: ingredient.outsideId, id: ingredient.id}})})
+    })
+  })
+});
+
+router.delete('/cart', ensureAuthenticated, function(req, res){
+  if(req.body.itemId){//delete single item
+    models.users.findOne({where:{username: res.user.user}}).then((user)=>{
+      models.shoppingCart.findOrCreate({where: {userId:user.id}, defaults: {status: 'open'}, include:[{model: models.ingredients, as: 'ingredients'}]}).then((carts)=>{
+        models.ingredientCart.destroy({where: {cartId:carts[0].id, ingredientId: req.body.itemId}}).then((deleted)=>{
+          if(deleted){
+            res.status(200).send({response: 'successfully deleted item'})
+          }
+          else{
+            res.status(400).send()
+          }
+        })
+      })
+    })
+  }
+  else{//clear cart
+    models.users.findOne({where:{username: res.user.user}}).then((user)=>{
+      models.shoppingCart.findOrCreate({where: {userId:user.id}, defaults: {status: 'open'}, include:[{model: models.ingredients, as: 'ingredients'}]}).then((carts)=>{
+        models.ingredientCart.destroy({where: {cartId:carts[0].id}}).then((deleted)=>{
+          if(deleted){
+            res.status(200).send({response: 'successfully cleared cart'})
+          }
+          else{
+            res.status(400).send()
+          }
+        })
+      })
     })
   }
 })
