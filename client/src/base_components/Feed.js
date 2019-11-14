@@ -14,18 +14,21 @@ const useStyles = makeStyles(theme => ({
 export default function Feed(props) {
     const classes = useStyles();
     const [recipes, setRecipes] = React.useState([]);
+   
+    React.useEffect(() => {
+        fetch('api/recipes', {
+            method: 'get',
+            headers: {
+            "Content-Type": "application/json"
+            },
+            body: JSON.stringify(props.query)
+        }).then((res)=>{
+            return res.json() 
+        }).then((recipes)=>{
+            setRecipes(recipes)
+        })
+    }, []);
 
-    fetch('api/recipes', {
-        method: 'get',
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(props.query)
-    }).then((res)=>{
-        return res.json() 
-    }).then((recipes)=>{
-        setRecipes(recipes)
-    })
     return (
         <div>
             {recipes.map((recipe)=> (
