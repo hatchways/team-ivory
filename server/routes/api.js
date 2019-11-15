@@ -37,22 +37,7 @@ router.post('/recipes', ensureAuthenticated, imageUpload, async function(req, re
           return tag.id;
         });
     })
-  ).then(tagIds => {
-    //then use those ids to create a recipe
-    models.recipes
-      .create({
-        userId: req.user.id,
-        name: name,
-        image: req.file.path,
-        steps: steps,
-        tags: tagIds,
-        ingredients: ingredients.map(ingredient => {
-          return ingredient.ingredient.label;
-        }),
-        createdAt: Date.now(),
-        updatedAt: Date.now()
-      }).then((tag)=>{return tag.id})
-  })).then((tagIds)=>{//then use those ids to create a recipe
+  ).then((tagIds)=>{//then use those ids to create a recipe
     models.recipes.create({
       userId: 1,
       name: name,
