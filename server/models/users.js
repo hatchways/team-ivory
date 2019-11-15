@@ -8,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
     password: DataTypes.STRING
   }, {});
   users.associate = function(models) {
-    // associations can be defined here
+    users.hasOne(models.shoppingCart)
   };
   return users;
 };

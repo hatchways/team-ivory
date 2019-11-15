@@ -4,12 +4,11 @@ module.exports = (sequelize, DataTypes) => {
     userId: DataTypes.INTEGER,
     name: DataTypes.STRING,
     image: DataTypes.STRING,
-    ingredients: DataTypes.ARRAY(DataTypes.STRING),
     steps: DataTypes.ARRAY(DataTypes.STRING),
     tags: DataTypes.ARRAY(DataTypes.STRING)
   }, {});
   recipes.associate = function(models) {
-    // associations can be defined here
+    recipes.hasMany(models.ingredients)
   };
   return recipes;
 };
