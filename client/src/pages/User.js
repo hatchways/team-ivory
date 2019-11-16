@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import RecipeCard from '../base_components/RecipeCard';
+import { Link } from 'react-router-dom';
 
 import { Typography } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
@@ -44,7 +45,7 @@ class User extends Component {
     username: '',
     first: '',
     last: '',
-    email: '',
+    createdAt: '',
     recipes: [],
   };
 
@@ -94,7 +95,7 @@ class User extends Component {
 
   render() {
     const { classes } = this.props;
-    const { firstName, lastName, email, username } = this.state;
+    const { firstName, lastName, createdAt, username } = this.state;
     const urlUser = this.props.location.pathname.split('/').pop();
     const { user } = this.props;
     const { recipes } = this.state;
@@ -110,7 +111,7 @@ class User extends Component {
           <div className={classes.userDetails}>
             <h1>{`${firstName} ${lastName}`}</h1>
             <label>{`@${username}`}</label>
-            <p>{`Email: ${email}`}</p>
+            <p>{`Joined: ${createdAt}`}</p>
           </div>
         </div>
         {ownProfile ? <UserLinks classes={classes} signout={() => this.signout()} /> : null}
@@ -134,6 +135,7 @@ class UserLinks extends Component {
       <div className={classes.userLinks}>
         <button>Favorites</button>
         <button>Basket</button>
+        <Link to="/profile">Edit Profile</Link>
         <button onClick={this.props.signout}>Sign out</button>
       </div>
     );

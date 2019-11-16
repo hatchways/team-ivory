@@ -18,7 +18,13 @@ router.get('/', ensureAuthenticated, (req, res, next) => {
     const { username, firstName, lastName, email } = user.dataValues;
     res.status(200).send({ username, firstName, lastName, email });
   });
-  // res.status(200).send({});
+});
+
+router.get('/profile', ensureAuthenticated, (req, res, next) => {
+  console.log('Requesting profile page');
+  console.log(req.user);
+  const { username, firstName, lastName, email, createdAt } = req.user;
+  res.status(200).send({ user: { username, firstName, lastName, email, createdAt } });
 });
 
 router.get('/:username', (req, res, next) => {
@@ -27,8 +33,8 @@ router.get('/:username', (req, res, next) => {
   models.users.findOne({ where: { username: req.params.username } }).then(user => {
     if (user) {
       console.log(user.dataValues);
-      const { username, firstName, lastName, email } = user.dataValues;
-      return res.status(200).send({ username, firstName, lastName, email });
+      const { username, firstName, lastName, createdAt } = user.dataValues;
+      return res.status(200).send({ username, firstName, lastName, createdAt });
     }
     return res.status(400).send({ error: 'Requested user does not exist' });
   });
