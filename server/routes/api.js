@@ -96,7 +96,7 @@ router.get('/recipes', function(req, res, next) {
 
 router.post('/cart',ensureAuthenticated, function(req, res, next){
   models.recipes.findOne({where: {id: req.body.recipeId}, include: [models.ingredients]}).then((recipe)=>{
-    models.users.findOne({where:{username: res.user.user}}).then((user)=>{
+    models.users.findOne({where:{id: req.user.id}}).then((user)=>{
       models.shoppingCart.findOrCreate({where: {userId:user.id}, defaults: {status: 'open'}, include:[{model: models.ingredients, as: 'ingredients'}]}).then((carts)=>{
         Promise.all(recipe.ingredients.map((ingredient)=>{
           if(!carts[0].ingredients.map((ingredient)=>{return ingredient.outsideId}).includes(ingredient.outsideId)){
@@ -114,7 +114,7 @@ router.post('/cart',ensureAuthenticated, function(req, res, next){
 })
 
 router.get('/cart', ensureAuthenticated, function(req, res, next){
-  models.users.findOne({where:{username: res.user.user}}).then((user)=>{
+  models.users.findOne({where:{id: req.user.id}}).then((user)=>{
     models.shoppingCart.findOrCreate({where: {userId:user.id}, defaults: {status: 'open'}, include:[{model: models.ingredients, as: 'ingredients'}]}).then((carts)=>{
       res.status(200).send({ingredients: carts[0].ingredients.map((ingredient)=>{ return {name: ingredient.name, outsideId: ingredient.outsideId, id: ingredient.id}})})
     })
@@ -123,7 +123,7 @@ router.get('/cart', ensureAuthenticated, function(req, res, next){
 
 router.delete('/cart', ensureAuthenticated, function(req, res){
   if(req.body.itemId){//delete single item
-    models.users.findOne({where:{username: res.user.user}}).then((user)=>{
+    models.users.findOne({where:{id: req.user.id}}).then((user)=>{
       models.shoppingCart.findOrCreate({where: {userId:user.id}, defaults: {status: 'open'}, include:[{model: models.ingredients, as: 'ingredients'}]}).then((carts)=>{
         models.ingredientCart.destroy({where: {cartId:carts[0].id, ingredientId: req.body.itemId}}).then((deleted)=>{
           if(deleted){
@@ -137,7 +137,7 @@ router.delete('/cart', ensureAuthenticated, function(req, res){
     })
   }
   else{//clear cart
-    models.users.findOne({where:{username: res.user.user}}).then((user)=>{
+    models.users.findOne({where:{id: req.user.id}}).then((user)=>{
       models.shoppingCart.findOrCreate({where: {userId:user.id}, defaults: {status: 'open'}, include:[{model: models.ingredients, as: 'ingredients'}]}).then((carts)=>{
         models.ingredientCart.destroy({where: {cartId:carts[0].id}}).then((deleted)=>{
           if(deleted){

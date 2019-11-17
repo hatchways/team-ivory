@@ -40,6 +40,7 @@ class Cart extends Component {
     }
 
     componentDidMount(){
+        console.log( this.props.location.pathname.split('/').pop())
         fetch('api/cart', {
             method: 'get',
             headers: {
