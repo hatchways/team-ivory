@@ -21,7 +21,7 @@ const Favorites = ({ id, username, firstName }) => {
 			<h1>{firstName}'s Favorites!</h1>
 			{favoritesArray.map(favorite => (
 				<p>
-					<img src={favorite.recipe.image} /> {favorite.recipe.name}{" "}
+					<img src={favorite.recipe.image} style={{ width: "200px" }} /> {favorite.recipe.name}{" "}
 				</p>
 			))}
 		</div>

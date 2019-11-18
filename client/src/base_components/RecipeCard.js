@@ -85,7 +85,7 @@ export default function RecipeCard(props) {
       />
       <CardActions disableSpacing style={{flexWrap: 'wrap'}}>
         <IconButton aria-label="add to favorites">
-          <FavoriteIcon />
+          {props.recipe.favorited ? <FavoriteIcon color="error" /> : <FavoriteIcon />}
         </IconButton>
         {props.recipe.tags.map((tag, index) => (
             <a href='' key={index}>#{tag}</a>

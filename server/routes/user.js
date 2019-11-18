@@ -33,7 +33,7 @@ router.get("/:username", (req, res, next) => {
 
 router.post("/:username/favorites", ensureAuthenticated, (req, res) => {
 	console.log("User's favorites");
-	console.log(req.user)
+	console.log("user id", req.user.id)
 
 	// Create association
 	models.favorites.belongsTo(models.recipes, { foreign_key: "recipeId" });
@@ -48,6 +48,7 @@ router.post("/:username/favorites", ensureAuthenticated, (req, res) => {
 			where: { userId: req.user.id, favorited: 1 }
 		})
 		.then(function(recipes) {
+			console.log("RECIPES",recipes)
 			const favorites = recipes.map(recipe => recipe.dataValues);
 			res.status(200).send({ favorites });
 		});

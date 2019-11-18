@@ -11,7 +11,6 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import User from "./pages/User";
 import Cart from "./pages/Cart";
-import Feed from "./base_components/Feed";
 import AppNavbar from "./base_components/Navbar";
 
 import "./App.css";
@@ -50,12 +49,6 @@ class App extends Component {
           <div style={{ marginTop: "4rem" }}>
             <Route exact path="/" component={LandingPage} />
             <Route exact path="/builder" component={BuilderPage} />
-            <Route exact 
-              path="/feed" 
-              render={props => (
-                <Feed {...props} user={this.state.user} />
-              )} 
-            />
             <Route exact path="/cart" component={Cart} />
             <Route
               exact
