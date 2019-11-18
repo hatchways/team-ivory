@@ -12,7 +12,7 @@ module.exports = {
     return queryInterface.addColumn(
       'recipes',
       'ingredients',
-      Sequelize.ARRAY
+      Sequelize.ARRAY(Sequelize.STRING)
     )
   }
 };
