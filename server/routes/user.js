@@ -42,8 +42,7 @@ router.post("/:username/favorites", ensureAuthenticated, (req, res) => {
 	models.favorites
 		.findAll({
 			include: {
-				model: models.recipes,
-				where: { userId: req.user.id }
+				model: models.recipes
 			},
 			where: { userId: req.user.id, favorited: 1 }
 		})
