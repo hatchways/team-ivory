@@ -3,6 +3,7 @@ import React, { Component } from "react";
 import { Typography } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 import { Route, Link } from "react-router-dom";
+import Feed from '../base_components/Feed'
 
 import Ping from "./Ping";
 
@@ -16,23 +17,21 @@ class LandingPage extends Component {
   state = {
     testUser: "Client did not fetch test user from database (check your code)",
     welcomeMessage: "Step 1: Run the server and refresh (not running)",
-    step: 0
+    step: 0,
+    recipes: []
   };
 
   componentDidMount() {
-    fetch("/welcome")
-      .then(res => {
-        console.log(res);
-        if (res.status === 200) return res.json();
-        else throw Error("Couldn't connect to the server");
-      })
-      .then(res => {
-        this.setState({ welcomeMessage: res.welcomeMessage, testUser: `Client fetched test user from database successfully: username: ${res.testUser.username}, name: ${res.testUser.firstName} ${res.testUser.lastName}`});
-        this.incrementStep();
-      })
-      .catch(err => {
-        console.log(err.message);
-      });
+    fetch('api/recipes', {
+        method: 'get',
+        headers: {
+          "Content-Type": "application/json"
+        }
+    }).then((res)=>{
+        return res.json() 
+    }).then((recipes)=>{
+        this.setState({recipes: recipes})
+    })
   }
 
   incrementStep = () => {
@@ -43,28 +42,7 @@ class LandingPage extends Component {
     const { classes } = this.props;
     return (
       <div className={classes.landingContainer}>
-        <Typography>{this.state.testUser}</Typography>
-        <Typography>{this.state.welcomeMessage}</Typography>
-        {this.state.step >= 1 && (
-          <React.Fragment>
-            <Link to="/ping">Step 2: Click here </Link>
-            <Route
-              path="/ping"
-              render={props => {
-                return (
-                  <Ping
-                    {...props}
-                    incrementStep={this.incrementStep}
-                    step={this.state.step}
-                  />
-                );
-              }}
-            />
-          </React.Fragment>
-        )}
-        {this.state.step >= 3 && (
-          <Typography>All done! Now go make a pull request!</Typography>
-        )}
+        <Feed recipes={this.state.recipes} />
       </div>
     );
   }

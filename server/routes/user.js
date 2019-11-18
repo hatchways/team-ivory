@@ -1,19 +1,19 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const passport = require("passport");
-const bcrypt = require("bcrypt");
-const models = require("../models");
-const jwt = require("jsonwebtoken");
-const { ensureAuthenticated } = require("../config/auth");
+const passport = require('passport');
+const bcrypt = require('bcrypt');
+const models = require('../models');
+const jwt = require('jsonwebtoken');
+const { ensureAuthenticated } = require('../config/auth');
 const Op = models.Sequelize.Op;
 
-const secret = "5a4fs5mk45u.JN6s";
+const secret = '5a4fs5mk45u.JN6s';
 
 router.get("/", ensureAuthenticated, (req, res, next) => {
 	console.log("user base url");
 	console.log(req.params);
-	console.log(res.user);
-	models.users.findOne({ where: { username: res.user.user } }).then(function(user) {
+	console.log(req.user);
+	models.users.findOne({ where: { username: req.user.user } }).then(function(user) {
 		console.log(user.dataValues);
 		const { username, firstName, lastName, email } = user.dataValues;
 		res.status(200).send({ username, firstName, lastName, email });
@@ -33,6 +33,7 @@ router.get("/:username", (req, res, next) => {
 
 router.post("/:username/favorites", ensureAuthenticated, (req, res) => {
 	console.log("User's favorites");
+	console.log(req.user)
 
 	// Create association
 	models.favorites.belongsTo(models.recipes, { foreign_key: "recipeId" });
@@ -42,9 +43,9 @@ router.post("/:username/favorites", ensureAuthenticated, (req, res) => {
 		.findAll({
 			include: {
 				model: models.recipes,
-				where: { userId: res.user.id }
+				where: { userId: req.user.id }
 			},
-			where: { userId: res.user.id, favorited: 1 }
+			where: { userId: req.user.id, favorited: 1 }
 		})
 		.then(function(recipes) {
 			const favorites = recipes.map(recipe => recipe.dataValues);

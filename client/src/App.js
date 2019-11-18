@@ -7,13 +7,15 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { theme } from "./themes/theme";
 import LandingPage from "./pages/Landing";
 import BuilderPage from "./pages/Builder";
-import Feed from "./base_components/Feed";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import User from "./pages/User";
+import Cart from "./pages/Cart";
+import Feed from "./base_components/Feed";
 import AppNavbar from "./base_components/Navbar";
 
 import "./App.css";
+
 
 class App extends Component {
   state = { user: null };
@@ -21,10 +23,6 @@ class App extends Component {
   componentDidMount() {
     this.updateUser();
   }
-
-  // userId() {
-  //   c
-  // }
 
   updateUser() {
     // If jwt cookie set, get user from the cookie
@@ -58,6 +56,7 @@ class App extends Component {
                 <Feed {...props} user={this.state.user} />
               )} 
             />
+            <Route exact path="/cart" component={Cart} />
             <Route
               exact
               path="/login"
