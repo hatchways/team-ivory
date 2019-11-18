@@ -143,6 +143,7 @@ class UserLinks extends Component {
 				<button onClick={this.props.favorites}>Favorites</button>
 				<button>Basket</button>
 				<button onClick={this.props.signout}>Sign out</button>
+				<Link to="/profile">Profile</Link>
 			</div>
 		);
 	}
