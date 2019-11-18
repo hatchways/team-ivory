@@ -19,12 +19,10 @@ export default class AppNavbar extends Component {
           </Link>
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
-        <Navbar.Collapse id="basic-navbar-nav">
-          <Nav>
-            <Link className="navLink" style={this.navlinkStyle} to="/feed">
-              Feed
-            </Link>
-          </Nav>
+        <Navbar.Collapse id="basic-navbar-nav"> 
+          {/* <Nav>
+              <Link className='navLink' style={this.navlinkStyle} to='/feed'>Feed</Link>
+          </Nav> */}
           <Nav className="mr-auto">
             {this.props.user ? (
               <SignedIn name={this.props.user.name} username={this.props.user.user} />
@@ -63,6 +61,9 @@ class SignedIn extends Component {
           </Link>
         </Nav>
         <Nav>
+            <Link className='navLink' style={this.navlinkStyle} to='/cart'>Cart</Link>
+        </Nav>
+        <Nav>
           <Link className="navLink" style={this.navlinkStyle} to={`/user/${this.props.username}`}>
             {this.props.name}
           </Link>
@@ -71,6 +72,7 @@ class SignedIn extends Component {
     );
   }
 }
+
 
 class AnonUser extends Component {
   render() {

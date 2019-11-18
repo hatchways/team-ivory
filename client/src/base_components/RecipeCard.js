@@ -13,38 +13,55 @@ import Typography from '@material-ui/core/Typography';
 import { red } from '@material-ui/core/colors';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
+
 
 const useStyles = makeStyles(theme => ({
-  card: {
-    maxWidth: 500,
-  },
-  media: {
-    height: 0,
-    paddingTop: '56.25%', // 16:9
-  },
-  expand: {
-    transform: 'rotate(0deg)',
-    marginLeft: 'auto',
-    transition: theme.transitions.create('transform', {
-      duration: theme.transitions.duration.shortest,
-    }),
-  },
-  expandOpen: {
-    transform: 'rotate(180deg)',
-  },
-  avatar: {
-    backgroundColor: red[500],
-  },
+	card: {
+		maxWidth: 500
+	},
+	media: {
+		height: 0,
+		paddingTop: "56.25%" // 16:9
+	},
+	expand: {
+		transform: "rotate(0deg)",
+		marginLeft: "auto",
+		transition: theme.transitions.create("transform", {
+			duration: theme.transitions.duration.shortest
+		})
+	},
+	expandOpen: {
+		transform: "rotate(180deg)"
+	},
+	avatar: {
+		backgroundColor: red[500]
+	}
 }));
 
 export default function RecipeCard(props) {
-  const classes = useStyles();
-  const [expanded, setExpanded] = React.useState(false);
+	const classes = useStyles();
+	const [expanded, setExpanded] = React.useState(false);
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
   };
-  console.log(props.className)
+
+  const handleAdToCart = () => {
+    fetch('api/cart', {
+        method: 'post',
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          recipeId: props.recipe.id
+        })
+    }).then((res)=>{
+        return res.json() 
+    }).then((cart)=>{
+        console.log(cart)
+    })
+  }
   return (
     <Card className={classes.card+' '+props.className} id={props.id}>
       <CardHeader
@@ -55,6 +72,11 @@ export default function RecipeCard(props) {
         }
         title={props.recipe.name}
         subheader="September 14, 2016"
+        action={
+          <IconButton aria-label="settings" onClick={handleAdToCart}>
+            <AddShoppingCartIcon />
+          </IconButton>
+        }
       />
       <CardMedia
         className={classes.media}
@@ -63,7 +85,7 @@ export default function RecipeCard(props) {
       />
       <CardActions disableSpacing style={{flexWrap: 'wrap'}}>
         <IconButton aria-label="add to favorites">
-          <FavoriteIcon />
+          {props.recipe.favorited ? <FavoriteIcon color="error" /> : <FavoriteIcon />}
         </IconButton>
         {props.recipe.tags.map((tag, index) => (
             <a href='' key={index}>#{tag}</a>
