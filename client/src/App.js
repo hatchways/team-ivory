@@ -22,12 +22,17 @@ class App extends Component {
     this.updateUser();
   }
 
+  // userId() {
+  //   c
+  // }
+
   updateUser() {
     // If jwt cookie set, get user from the cookie
     console.info("Updating user...");
     const jwt = Cookies.get("jwt");
     if (jwt) {
       const user = atob(jwt.split(".")[1]);
+      console.log("JWT", user)
       this.setState({ user: JSON.parse(user) });
     }
   }
@@ -38,6 +43,7 @@ class App extends Component {
 
   render() {
     console.log("Rerending app.");
+    console.log("THIS.STATE", this.state.user)
     const { user } = this.state;
     return (
       <MuiThemeProvider theme={theme}>
@@ -46,7 +52,12 @@ class App extends Component {
           <div style={{ marginTop: "4rem" }}>
             <Route exact path="/" component={LandingPage} />
             <Route exact path="/builder" component={BuilderPage} />
-            <Route exact path="/feed" component={Feed} />
+            <Route exact 
+              path="/feed" 
+              render={props => (
+                <Feed {...props} user={this.state.user} />
+              )} 
+            />
             <Route
               exact
               path="/login"

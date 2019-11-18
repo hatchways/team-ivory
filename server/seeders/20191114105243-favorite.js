@@ -13,6 +13,13 @@ module.exports = {
 			},
 			{
 				userId: 1,
+				recipeId: 2,
+				favorited: 0,
+				createdAt: new Date(),
+				updatedAt: new Date()
+			},
+			{
+				userId: 1,
 				recipeId: 3,
 				favorited: 1,
 				createdAt: new Date(),
@@ -22,6 +29,20 @@ module.exports = {
 				userId: 1,
 				recipeId: 7,
 				favorited: 1,
+				createdAt: new Date(),
+				updatedAt: new Date()
+			},
+			{
+				userId: 2,
+				recipeId: 3,
+				favorited: 1,
+				createdAt: new Date(),
+				updatedAt: new Date()
+			},
+			{
+				userId: 2,
+				recipeId: 1,
+				favorited: 0,
 				createdAt: new Date(),
 				updatedAt: new Date()
 			}

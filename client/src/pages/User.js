@@ -3,6 +3,7 @@ import React, { Component } from "react";
 import { Typography } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 
+import UserContext from "../base_components/UserContext"
 import Favorites from "./Favorites";
 
 const landinPageStyle = theme => ({

@@ -31,18 +31,20 @@ router.get("/:username", (req, res, next) => {
 	});
 });
 
-router.post("/:username/favorites", (req, res) => {
+router.post("/:username/favorites", ensureAuthenticated, (req, res) => {
 	console.log("User's favorites");
-	console.log(req.body);
-	// models.users.hasMany(models.favorites), {foreign_key: 'userId'};
-	models.recipes.hasMany(models.favorites), { foreign_key: "recipeId" };
-	// models.recipes.belongsTo(models.users, {foreign_key: "userId"})
-	models.recipes
+
+	// Create association
+	models.favorites.belongsTo(models.recipes, { foreign_key: "recipeId" });
+
+	// Find all favorites by current user and joins the recipe to each favorite
+	models.favorites
 		.findAll({
 			include: {
-				model: models.favorites,
-				where: { userId: req.body.id }
-			}
+				model: models.recipes,
+				where: { userId: res.user.id }
+			},
+			where: { userId: res.user.id, favorited: 1 }
 		})
 		.then(function(recipes) {
 			const favorites = recipes.map(recipe => recipe.dataValues);

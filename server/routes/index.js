@@ -10,7 +10,7 @@ const Op = models.Sequelize.Op;
 const secret = "5a4fs5mk45u.JN6s";
 
 router.get("/welcome", function(req, res, next) {
-  console.log(req.cookies);
+  console.log("THISIS", req.cookies);
   models.users.findAll({}).then(function(users) {
     let testUser = users[0].dataValues;
     console.log(testUser);
@@ -41,6 +41,7 @@ router.post("/login", (req, res, next) => {
   )(req, res, next);
 
   async function handleLogin(err, user, info) {
+    console.log("HANDLE", user)
     if (err)
       res.status(500).send({
         message: "There was a server error processing your request."
@@ -51,8 +52,9 @@ router.post("/login", (req, res, next) => {
       });
     else {
       // Token w/out expiry
+      console.log("TOKEHSAN", user)
       const token = await jwt.sign(
-        { user: user.username, name: user.firstName },
+        { id: user.id, user: user.username, name: user.firstName },
         secret
       );
       res.cookie("jwt", token);

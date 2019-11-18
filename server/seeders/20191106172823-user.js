@@ -6,8 +6,8 @@ module.exports = {
 		const users = [
 			{
 				username: "testuser",
-				firstName: "Goulash",
-				lastName: "Man",
+				firstName: "Nick",
+				lastName: "Saban",
 				email: "test@test.com",
 				password: "$2b$10$xJa4xYq7WvnA1d63TDSar.qPE87u21VXatJ8nHRi8g9HxTyWn7f56",
 				createdAt: new Date(),
