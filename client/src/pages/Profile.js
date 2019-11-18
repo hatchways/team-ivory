@@ -49,6 +49,8 @@ class ProfileData extends Component {
         <label>{createdAt}</label>
         <br />
         <button onClick={edit}>Edit</button>
+        <button>Change Password</button>
+        <br />
       </div>
     );
   }
