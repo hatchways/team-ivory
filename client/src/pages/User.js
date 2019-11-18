@@ -1,48 +1,49 @@
-import React, { Component } from "react";
-import RecipeCard from "../base_components/RecipeCard";
+import React, { Component } from 'react';
+import RecipeCard from '../base_components/RecipeCard';
+import { Link } from 'react-router-dom';
 
-import { Typography } from "@material-ui/core";
-import { withStyles } from "@material-ui/core/styles";
+import { Typography } from '@material-ui/core';
+import { withStyles } from '@material-ui/core/styles';
 
-import Favorites from "./Favorites";
+import Favorites from './Favorites';
 
 const landinPageStyle = theme => ({
 	landingContainer: {
-		margin: theme.spacing.unit * 2
+		margin: theme.spacing.unit * 2,
 	},
 	userCard: {
-		display: "flex",
-		border: "2px solid #000000",
-		"border-radius": "5px",
-		"box-shadow": "5px 6px 0px #E0E0E0",
-		margin: "20px",
-		padding: "10px"
+		display: 'flex',
+		border: '2px solid #000000',
+		'border-radius': '5px',
+		'box-shadow': '5px 6px 0px #E0E0E0',
+		margin: '20px',
+		padding: '10px',
 	},
 	userDetails: {
-		margin: "10px 30px"
+		margin: '10px 30px',
 	},
 	profilePic: {
-		width: "150px",
-		height: "150px",
-		"border-radius": "50%",
-		border: "2px solid #000000"
+		width: '150px',
+		height: '150px',
+		'border-radius': '50%',
+		border: '2px solid #000000',
 	},
 	userLinks: {
-		width: "100px",
-		display: "flex",
-		"flex-direction": "column"
-	}
+		width: '100px',
+		display: 'flex',
+		'flex-direction': 'column',
+	},
 });
 
 class User extends Component {
 	state = {
-		id: "",
-		username: "",
-		first: "",
-		last: "",
-		email: "",
+		id: '',
+		username: '',
+		first: '',
+		last: '',
+		createdAt: '',
 		recipes: [],
-		favorites: false
+		favorites: false,
 	};
 
 	// Set up initial user
@@ -61,11 +62,11 @@ class User extends Component {
 
 	// Get the user from the url and request data from server
 	async requestUser() {
-		const urlUser = this.props.location.pathname.split("/").pop();
-		const res = await fetch("/user/" + urlUser);
+		const urlUser = this.props.location.pathname.split('/').pop();
+		const res = await fetch('/user/' + urlUser);
 		console.log(res);
 		if (res.status >= 400 && res.status < 500) {
-			return this.props.history.push("/login");
+			return this.props.history.push('/login');
 		}
 		if (res.status === 200) {
 			const data = await res.json();
@@ -76,8 +77,8 @@ class User extends Component {
 
 	// Get user's recipes
 	async getRecipes() {
-		const urlUser = this.props.location.pathname.split("/").pop();
-		const res = await fetch("/api/recipes/" + urlUser);
+		const urlUser = this.props.location.pathname.split('/').pop();
+		const res = await fetch('/api/recipes/' + urlUser);
 
 		if (res.status === 200) {
 			const data = await res.json();
@@ -86,22 +87,22 @@ class User extends Component {
 	}
 
 	async signout() {
-		console.info("Signing out...");
-		const res = await fetch("/user/signout", { method: "POST" });
+		console.info('Signing out...');
+		const res = await fetch('/user/signout', { method: 'POST' });
 		console.log(await res.json());
 		this.props.logout();
-		this.props.history.push("/login");
+		this.props.history.push('/login');
 	}
 
 	favorites() {
-		console.log("Clicked Favorites");
+		console.log('Clicked Favorites');
 		this.setState({ favorites: !this.state.favorites });
 	}
 
 	render() {
 		const { classes } = this.props;
 		const { id, firstName, lastName, email, username } = this.state;
-		const urlUser = this.props.location.pathname.split("/").pop();
+		const urlUser = this.props.location.pathname.split('/').pop();
 		const { user } = this.props;
 		const { recipes } = this.state;
 		let ownProfile = false;
@@ -120,7 +121,7 @@ class User extends Component {
 					</div>
 				</div>
 				{ownProfile ? <UserLinks classes={classes} signout={() => this.signout()} favorites={() => this.favorites()} /> : null}
-				<div>{this.state.favorites ? <Favorites id={id} username={username} firstName={firstName} /> : ""}</div>
+				<div>{this.state.favorites ? <Favorites id={id} username={username} firstName={firstName} /> : ''}</div>
 				<div>
 					<h2>{`${firstName}'s recipes:`}</h2>
 					{recipes.length > 0 ? (
@@ -142,6 +143,7 @@ class UserLinks extends Component {
 				<button onClick={this.props.favorites}>Favorites</button>
 				<button>Basket</button>
 				<button onClick={this.props.signout}>Sign out</button>
+				<Link to="/profile">Profile</Link>
 			</div>
 		);
 	}
