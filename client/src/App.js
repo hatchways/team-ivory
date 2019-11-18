@@ -29,6 +29,7 @@ class App extends Component {
     const jwt = Cookies.get("jwt");
     if (jwt) {
       const user = atob(jwt.split(".")[1]);
+      console.log("JWT", user)
       this.setState({ user: JSON.parse(user) });
     }
   }
@@ -39,6 +40,7 @@ class App extends Component {
 
   render() {
     console.log("Rerending app.");
+    console.log("THIS.STATE", this.state.user)
     const { user } = this.state;
     return (
       <MuiThemeProvider theme={theme}>

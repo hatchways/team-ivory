@@ -17,31 +17,31 @@ import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
 
 
 const useStyles = makeStyles(theme => ({
-  card: {
-    maxWidth: 500,
-  },
-  media: {
-    height: 0,
-    paddingTop: '56.25%', // 16:9
-  },
-  expand: {
-    transform: 'rotate(0deg)',
-    marginLeft: 'auto',
-    transition: theme.transitions.create('transform', {
-      duration: theme.transitions.duration.shortest,
-    }),
-  },
-  expandOpen: {
-    transform: 'rotate(180deg)',
-  },
-  avatar: {
-    backgroundColor: red[500],
-  },
+	card: {
+		maxWidth: 500
+	},
+	media: {
+		height: 0,
+		paddingTop: "56.25%" // 16:9
+	},
+	expand: {
+		transform: "rotate(0deg)",
+		marginLeft: "auto",
+		transition: theme.transitions.create("transform", {
+			duration: theme.transitions.duration.shortest
+		})
+	},
+	expandOpen: {
+		transform: "rotate(180deg)"
+	},
+	avatar: {
+		backgroundColor: red[500]
+	}
 }));
 
 export default function RecipeCard(props) {
-  const classes = useStyles();
-  const [expanded, setExpanded] = React.useState(false);
+	const classes = useStyles();
+	const [expanded, setExpanded] = React.useState(false);
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
@@ -85,7 +85,7 @@ export default function RecipeCard(props) {
       />
       <CardActions disableSpacing style={{flexWrap: 'wrap'}}>
         <IconButton aria-label="add to favorites">
-          <FavoriteIcon />
+          {props.recipe.favorited ? <FavoriteIcon color="error" /> : <FavoriteIcon />}
         </IconButton>
         {props.recipe.tags.map((tag, index) => (
             <a href='' key={index}>#{tag}</a>

@@ -40,6 +40,7 @@ router.post('/login', (req, res, next) => {
   )(req, res, next);
 
   async function handleLogin(err, user, info) {
+    console.log("HANDLE", user)
     if (err)
       res.status(500).send({
         message: 'There was a server error processing your request.',
@@ -50,9 +51,13 @@ router.post('/login', (req, res, next) => {
       });
     else {
       // Token w/out expiry
-      const token = await jwt.sign({ user: user.username, name: user.firstName }, secret);
-      res.cookie('jwt', token);
-      res.status(200).send({ message: 'Login ok.', username: user.username });
+      console.log("TOKEHSAN", user)
+      const token = await jwt.sign(
+        { id: user.id, user: user.username, name: user.firstName },
+        secret
+      );
+      res.cookie("jwt", token);
+      res.status(200).send({ message: "Login ok.", username: user.username });
     }
   }
 });

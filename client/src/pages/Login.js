@@ -20,7 +20,7 @@ const loginPageStyle = theme => ({
 });
 
 class Login extends Component {
-  state = { username: "", password: "" };
+  state = { username: "test@test.com", password: "test" };
 
   async login(evt) {
     // Prevent page reload
@@ -48,12 +48,14 @@ class Login extends Component {
             className={classes.formItem}
             type="email"
             placeholder="email"
+            value={this.state.username}
             onChange={e => this.setState({ username: e.target.value })}
           />
           <input
             className={classes.formItem}
             type="password"
             placeholder="password"
+            value={this.state.password}
             onChange={e => this.setState({ password: e.target.value })}
           />
           <input type="submit" />
