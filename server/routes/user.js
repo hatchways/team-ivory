@@ -65,6 +65,38 @@ router.post('/:username/favorites', ensureAuthenticated, (req, res) => {
 		});
 });
 
+router.post('/update', ensureAuthenticated, (req, res, next) => {
+	console.info(req.body);
+	const { field, value } = req.body;
+	let fieldName = null;
+	switch (field) {
+		case 'First Name':
+			fieldName = 'firstName';
+			break;
+		case 'Last Name':
+			fieldName = 'lastName';
+			break;
+		case 'Email':
+			fieldName = 'email';
+			break;
+		default:
+			return res.status(400).send({ message: 'Bad field request.' });
+	}
+
+	// TODO: ensure that the new email not already used by any accounts
+
+	models.users
+		.update(
+			{ [fieldName]: value },
+			{ returning: true, fields: [fieldName], where: { id: req.user.id } }
+		)
+		.then(result => {
+			console.log(result);
+			// TODO UPDATE COOKIE
+			res.status(200).send('done');
+		});
+});
+
 router.post('/signout', (req, res, next) => {
 	res.clearCookie('jwt');
 	res.status(200).send({ message: 'Signed out.' });
