@@ -6,6 +6,9 @@ node_modules/
 # production
 /build/
 
+# doc
+*.odt
+
 # misc
 .DS_Store
 .env.local
