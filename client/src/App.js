@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { MuiThemeProvider } from '@material-ui/core';
 import { BrowserRouter, Route } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import Cookies from 'js-cookie';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -16,6 +17,8 @@ import Cart from './pages/Cart';
 import AppNavbar from './base_components/Navbar';
 
 import './App.css';
+
+const history = createBrowserHistory();
 
 class App extends Component {
 	state = { user: null };
@@ -34,13 +37,17 @@ class App extends Component {
 		}
 	}
 
-	logout() {
+	async logout() {
+		console.info('Signing out...');
+		const res = await fetch('/user/signout', { method: 'POST' });
+		console.log(await res.json());
+		history.push('/login');
 		this.setState({ user: null });
+		history.go();
 	}
 
 	render() {
-		console.log('Rerending app.');
-		console.log('THIS.STATE', this.state.user);
+		console.log('Rerending main app.');
 		const { user } = this.state;
 		return (
 			<MuiThemeProvider theme={theme}>
@@ -54,11 +61,27 @@ class App extends Component {
 						<Route
 							exact
 							path="/login"
-							render={props => <Login {...props} updateUser={() => this.updateUser()} username={this.state} />}
+							render={props => (
+								<Login
+									{...props}
+									updateUser={() => this.updateUser()}
+									username={this.state}
+								/>
+							)}
 						/>
 						<Route exact path="/signup" component={Signup} />
 						<Route exact path="/profile" component={Profile} />
-						<Route exact path={`/user/:username`} render={props => <User {...props} user={user} logout={() => this.logout()} />} />
+						<Route
+							exact
+							path={`/user/:username`}
+							render={props => (
+								<User
+									{...props}
+									user={user}
+									logout={() => this.logout()}
+								/>
+							)}
+						/>
 					</div>
 				</BrowserRouter>
 			</MuiThemeProvider>
