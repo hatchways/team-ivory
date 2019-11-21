@@ -68,7 +68,11 @@ class Profile extends Component {
 					new Field('Last Name', user.lastName, true),
 					new Field('Email', user.email, true),
 					new Field('Username', user.username, false),
-					new Field('Member Since', `${date.getDate()}-${date.getMonth()}-${date.getFullYear()}`, false),
+					new Field(
+						'Member Since',
+						`${date.getDate()}-${date.getMonth()}-${date.getFullYear()}`,
+						false
+					),
 				],
 			});
 		}
@@ -81,13 +85,15 @@ class Profile extends Component {
 	async updateUser(field, value) {
 		this.setState({ editing: null });
 		if (['First Name', 'Last Name', 'Email'].includes(field)) {
-			console.log(field, value);
-			const res = fetch('/user/update', {
+			const res = await fetch('/user/update', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ field, value }),
 			});
 			if (res.status === 200) {
+				console.log('Profile update successfull.');
+				// Update the sesssion user in the main app
+				this.props.updateUser();
 				// TODO add pop up to notify user
 			}
 		}
@@ -96,7 +102,6 @@ class Profile extends Component {
 	render() {
 		const { editing, fields, status } = this.state;
 		const { classes } = this.props;
-		console.log(editing);
 		return (
 			<div className={classes.container}>
 				<div className={classes.profilePic}></div>
@@ -150,7 +155,11 @@ class LineItem extends Component {
 				)}
 				{editable ? (
 					editing ? (
-						<EditingOptions classes={classes} edit={edit} save={() => save(label, field)} />
+						<EditingOptions
+							classes={classes}
+							edit={edit}
+							save={() => save(label, field)}
+						/>
 					) : (
 						<button onClick={() => edit(label)} className={classes.editButton}>
 							Edit

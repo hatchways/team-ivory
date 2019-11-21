@@ -70,16 +70,18 @@ class App extends Component {
 							)}
 						/>
 						<Route exact path="/signup" component={Signup} />
-						<Route exact path="/profile" component={Profile} />
+						<Route
+							exact
+							path="/profile"
+							render={props => (
+								<Profile {...props} updateUser={() => this.updateUser()} />
+							)}
+						/>
 						<Route
 							exact
 							path={`/user/:username`}
 							render={props => (
-								<User
-									{...props}
-									user={user}
-									logout={() => this.logout()}
-								/>
+								<User {...props} user={user} logout={() => this.logout()} />
 							)}
 						/>
 					</div>
