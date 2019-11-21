@@ -7,9 +7,9 @@ import { withStyles } from '@material-ui/core/styles';
 
 import Favorites from './Favorites';
 
-const landinPageStyle = theme => ({
+const UserStyle = theme => ({
 	landingContainer: {
-		margin: theme.spacing.unit * 2,
+		// margin: theme.spacing.unit * 2,
 	},
 	userCard: {
 		display: 'flex',
@@ -120,12 +120,26 @@ class User extends Component {
 						<p>{`Email: ${email}`}</p>
 					</div>
 				</div>
-				{ownProfile ? <UserLinks classes={classes} signout={() => this.signout()} favorites={() => this.favorites()} /> : null}
-				<div>{this.state.favorites ? <Favorites id={id} username={username} firstName={firstName} /> : ''}</div>
+				{ownProfile ? (
+					<UserLinks
+						classes={classes}
+						signout={() => this.signout()}
+						favorites={() => this.favorites()}
+					/>
+				) : null}
+				<div>
+					{this.state.favorites ? (
+						<Favorites id={id} username={username} firstName={firstName} />
+					) : (
+						''
+					)}
+				</div>
 				<div>
 					<h2>{`${firstName}'s recipes:`}</h2>
 					{recipes.length > 0 ? (
-						recipes.map(recipe => <RecipeCard recipe={recipe} /*className={classes.recipeCard}*/ />)
+						recipes.map(recipe => (
+							<RecipeCard recipe={recipe} /*className={classes.recipeCard}*/ />
+						))
 					) : (
 						<label>This user hasn't posted any recipes yet</label>
 					)}
@@ -149,4 +163,4 @@ class UserLinks extends Component {
 	}
 }
 
-export default withStyles(landinPageStyle)(User);
+export default withStyles(UserStyle)(User);

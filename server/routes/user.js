@@ -3,11 +3,8 @@ const router = express.Router();
 const passport = require('passport');
 const bcrypt = require('bcrypt');
 const models = require('../models');
-const jwt = require('jsonwebtoken');
+const jwt = require('../config/jwt')['jwtManager'];
 const { ensureAuthenticated } = require('../config/auth');
-const Op = models.Sequelize.Op;
-
-const secret = '5a4fs5mk45u.JN6s';
 
 router.get('/', ensureAuthenticated, (req, res, next) => {
 	console.log('user base url');
@@ -62,6 +59,47 @@ router.post('/:username/favorites', ensureAuthenticated, (req, res) => {
 			console.log('RECIPES', recipes);
 			const favorites = recipes.map(recipe => recipe.dataValues);
 			res.status(200).send({ favorites });
+		});
+});
+
+router.post('/update', ensureAuthenticated, async (req, res, next) => {
+	console.info(req.body);
+	const { field, value } = req.body;
+	let fieldName = null;
+	switch (field) {
+		case 'First Name':
+			fieldName = 'firstName';
+			break;
+		case 'Last Name':
+			fieldName = 'lastName';
+			break;
+		case 'Email':
+			fieldName = 'email';
+			break;
+		default:
+			return res.status(400).send({ message: 'Bad field request.' });
+	}
+
+	// Ensure the email is not already in system
+	if (fieldName === 'email') {
+		const user = await models.users.findOne({ where: { email: value } });
+		if (user) return res.status(400).send({ message: 'Email already in use.' });
+	}
+
+	models.users
+		.update(
+			{ [fieldName]: value },
+			{ returning: true, fields: [fieldName], where: { id: req.user.id } }
+		)
+		.then(async result => {
+			let user;
+			for (let i in result) {
+				if (result[i][0]) user = result[i][0]['dataValues'];
+			}
+			// Update cookie to reflect the change
+			const token = await jwt.generateToken(user);
+			res.cookie('jwt', token);
+			res.status(200).send('done');
 		});
 });
 

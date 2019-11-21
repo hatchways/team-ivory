@@ -1,91 +1,191 @@
 import React, { Component } from 'react';
 
+import { withStyles } from '@material-ui/core/styles';
+import { nominalTypeHack } from 'prop-types';
+
+const ProfileStyles = theme => ({
+	container: {
+		margin: theme.spacing(2),
+		margin: '20px',
+		padding: '10px',
+		border: 'solid 2px #000000',
+		borderRadius: '5px',
+		'box-shadow': '5px 6px 0px #E0E0E0',
+		display: 'flex',
+		alignItems: 'center',
+	},
+	editButton: {
+		border: 'none',
+		color: 'blue',
+		padding: 5,
+		margin: 0,
+		background: '#ffffff',
+	},
+	profilePic: {
+		marginLeft: '10px',
+		width: '150px',
+		height: '150px',
+		'border-radius': '50%',
+		border: '2px solid #000000',
+	},
+	userData: {
+		marginLeft: '25px',
+	},
+	propertyName: {
+		'font-weight': 'bold',
+		width: '150px',
+	},
+	property: {
+		width: '200px',
+	},
+});
+
+class Field {
+	constructor(field, value, editable) {
+		this.field = field;
+		this.value = value;
+		this.editable = editable;
+	}
+}
+
 class Profile extends Component {
-  state = { editing: false, user: { firstName: '', lastName: '', email: '', createdAt: '', email: '', username: '' } };
+	state = {
+		editing: false,
+		fields: [],
+		editing: '',
+	};
 
-  async componentDidMount() {
-    let res = await fetch('/user/profile');
-    if (res.status === 200) {
-      let data = await res.json();
-      this.setState({ user: data.user });
-    }
-  }
+	async componentDidMount() {
+		const res = await fetch('/user/profile');
+		if (res.status === 200) {
+			const data = await res.json();
+			console.log(data);
+			const { user } = data;
+			const date = new Date(user.createdAt);
+			this.setState({
+				fields: [
+					new Field('First Name', user.firstName, true),
+					new Field('Last Name', user.lastName, true),
+					new Field('Email', user.email, true),
+					new Field('Username', user.username, false),
+					new Field(
+						'Member Since',
+						`${date.getDate()}-${date.getMonth()}-${date.getFullYear()}`,
+						false
+					),
+				],
+			});
+		}
+	}
 
-  updateUser(user) {
-    //TODO
-  }
+	openEditing(field) {
+		this.setState({ editing: field });
+	}
 
-  render() {
-    const { editing, user } = this.state;
-    console.log(this.state);
-    return (
-      <React.Fragment>
-        {!editing ? (
-          <ProfileData user={user} edit={() => this.setState({ editing: true })} />
-        ) : (
-          <ProfileEdit user={user} cancel={() => this.setState({ editing: false })} save={u => console.log(u)} />
-        )}
-      </React.Fragment>
-    );
-  }
+	async updateUser(field, value) {
+		this.setState({ editing: null });
+		if (['First Name', 'Last Name', 'Email'].includes(field)) {
+			const res = await fetch('/user/update', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ field, value }),
+			});
+			if (res.status === 200) {
+				console.log('Profile update successfull.');
+				// Update the sesssion user in the main app
+				this.props.updateUser();
+				// TODO add pop up to notify user
+			}
+		}
+	}
+
+	render() {
+		const { editing, fields, status } = this.state;
+		const { classes } = this.props;
+		return (
+			<div className={classes.container}>
+				<div className={classes.profilePic}></div>
+				<div className={classes.userData}>
+					<h2>Edit Profile</h2>
+					{fields.map(field => {
+						return (
+							<LineItem
+								key={field.field}
+								label={field.field}
+								value={field.value}
+								classes={classes}
+								edit={field => this.openEditing(field)}
+								save={(field, value) => this.updateUser(field, value)}
+								editable={field.editable}
+								editing={editing === field.field ? true : false}
+							/>
+						);
+					})}
+					<label>{status}</label>
+					<button>Change Password</button>
+					<br />
+				</div>
+			</div>
+		);
+	}
 }
 
-class ProfileData extends Component {
-  render() {
-    const { firstName, lastName, email, username, createdAt } = this.props.user;
-    const { edit } = this.props;
-    return (
-      <div>
-        <label>Name</label>
-        <label>{`${firstName} ${lastName}`}</label>
-        <br />
-        <label>Email</label>
-        <label>{email}</label>
-        <br />
-        <label>username</label>
-        <label>{username}</label>
-        <br />
-        <label>Member since: </label>
-        <label>{createdAt}</label>
-        <br />
-        <button onClick={edit}>Edit</button>
-        <button>Change Password</button>
-        <br />
-      </div>
-    );
-  }
+class LineItem extends Component {
+	constructor(props) {
+		super(props);
+		this.state = { editing: false, field: this.props.value };
+	}
+
+	componentDidUpdate(lastProps) {
+		if (lastProps !== this.props) {
+			this.setState({ field: this.props.value });
+		}
+	}
+
+	render() {
+		const { classes, label, value, editable, edit, editing, save } = this.props;
+		const { field } = this.state;
+		return (
+			<React.Fragment>
+				<label className={classes.propertyName}>{label}</label>
+				{!editing ? (
+					<label className={classes.property}>{value}</label>
+				) : (
+					<input value={field} onChange={e => this.setState({ field: e.target.value })} />
+				)}
+				{editable ? (
+					editing ? (
+						<EditingOptions
+							classes={classes}
+							edit={edit}
+							save={() => save(label, field)}
+						/>
+					) : (
+						<button onClick={() => edit(label)} className={classes.editButton}>
+							Edit
+						</button>
+					)
+				) : null}
+				<br />
+			</React.Fragment>
+		);
+	}
 }
 
-class ProfileEdit extends Component {
-  state = { user: this.props.user };
-
-  updateInput(field, value) {
-    this.setState({ [field]: value });
-  }
-
-  render() {
-    const { firstName, lastName, email, username, createdAt } = this.state.user;
-    const { cancel, save } = this.props;
-    return (
-      <div>
-        <label>Name</label>
-        <input value={firstName} onChange={e => this.updateInput('firstName', e.target.value)} />
-        <input value={lastName} onChange={e => this.updateInput('lastName', e.target.value)} />
-        <br />
-        <label>Email</label>
-        <input value={email} onChange={e => this.updateInput('email', e.target.value)} />
-        <br />
-        <label>username</label>
-        <label>{username}</label>
-        <br />
-        <label>Member since: </label>
-        <label>{createdAt}</label>
-        <br />
-        <button onClick={() => save(this.state.user)}>Save</button>
-        <button onClick={cancel}>Cancel</button>
-      </div>
-    );
-  }
+class EditingOptions extends Component {
+	render() {
+		const { classes, edit, save } = this.props;
+		return (
+			<React.Fragment>
+				<button className={classes.editButton} onClick={save}>
+					Save
+				</button>
+				<button className={classes.editButton} onClick={() => edit(null)}>
+					Cancel
+				</button>
+			</React.Fragment>
+		);
+	}
 }
 
-export default Profile;
+export default withStyles(ProfileStyles)(Profile);
