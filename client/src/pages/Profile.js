@@ -5,6 +5,7 @@ import { nominalTypeHack } from 'prop-types';
 
 const ProfileStyles = theme => ({
 	container: {
+		position: 'relative',
 		margin: theme.spacing(2),
 		margin: '20px',
 		padding: '10px',
@@ -38,6 +39,24 @@ const ProfileStyles = theme => ({
 	property: {
 		width: '200px',
 	},
+	popup: {
+		position: 'absolute',
+		top: '10px',
+		left: '50%', //FIX TO REFLECT 50% - width of element
+		display: 'flex',
+		justifyContent: 'center',
+		alignItems: 'center',
+		width: '250px',
+		padding: '10px',
+		// height: '50px',
+		borderRadius: '5px',
+	},
+	popupSuccess: {
+		background: '#A8C69F',
+	},
+	popupFail: {
+		background: '#EB9486',
+	},
 });
 
 class Field {
@@ -59,7 +78,6 @@ class Profile extends Component {
 		const res = await fetch('/user/profile');
 		if (res.status === 200) {
 			const data = await res.json();
-			console.log(data);
 			const { user } = data;
 			const date = new Date(user.createdAt);
 			this.setState({
@@ -95,15 +113,25 @@ class Profile extends Component {
 				// Update the sesssion user in the main app
 				this.props.updateUser();
 				// TODO add pop up to notify user
+				this.setState({ popup: { type: 'success', message: 'Update successful.' } }, () =>
+					setTimeout(() => this.setState({ popup: null }), 1000)
+				);
+			} else {
+				// Set error popup
+				let data = await res.json();
+				this.setState({ popup: { type: 'error', message: data.message } }, () =>
+					setTimeout(() => this.setState({ popup: null }), 1000)
+				);
 			}
 		}
 	}
 
 	render() {
-		const { editing, fields, status } = this.state;
+		const { popup, editing, fields, status } = this.state;
 		const { classes } = this.props;
 		return (
 			<div className={classes.container}>
+				{popup ? <Popup {...popup} classes={classes} /> : null}
 				<div className={classes.profilePic}></div>
 				<div className={classes.userData}>
 					<h2>Edit Profile</h2>
@@ -125,6 +153,20 @@ class Profile extends Component {
 					<button>Change Password</button>
 					<br />
 				</div>
+			</div>
+		);
+	}
+}
+
+class Popup extends Component {
+	render() {
+		const { classes, type, message } = this.props;
+		return (
+			<div
+				className={`${classes.popup} ${
+					type === 'success' ? classes.popupSuccess : classes.popupFail
+				}`}>
+				<label>{message}</label>
 			</div>
 		);
 	}
