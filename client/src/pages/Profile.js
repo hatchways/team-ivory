@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Button } from '@material-ui/core';
 
 import { withStyles } from '@material-ui/core/styles';
 import { nominalTypeHack } from 'prop-types';
@@ -14,13 +15,6 @@ const ProfileStyles = theme => ({
 		'box-shadow': '5px 6px 0px #E0E0E0',
 		display: 'flex',
 		alignItems: 'center',
-	},
-	editButton: {
-		border: 'none',
-		color: 'blue',
-		padding: 5,
-		margin: 0,
-		background: '#ffffff',
 	},
 	profilePic: {
 		marginLeft: '10px',
@@ -150,7 +144,9 @@ class Profile extends Component {
 						);
 					})}
 					<label>{status}</label>
-					<button>Change Password</button>
+					<Button variant="outlined" color="primary" href="/user/passwords/change">
+						Change Password
+					</Button>
 					<br />
 				</div>
 			</div>
@@ -197,15 +193,11 @@ class LineItem extends Component {
 				)}
 				{editable ? (
 					editing ? (
-						<EditingOptions
-							classes={classes}
-							edit={edit}
-							save={() => save(label, field)}
-						/>
+						<EditingOptions edit={edit} save={() => save(label, field)} />
 					) : (
-						<button onClick={() => edit(label)} className={classes.editButton}>
+						<Button color="primary" onClick={() => edit(label)}>
 							Edit
-						</button>
+						</Button>
 					)
 				) : null}
 				<br />
@@ -216,15 +208,15 @@ class LineItem extends Component {
 
 class EditingOptions extends Component {
 	render() {
-		const { classes, edit, save } = this.props;
+		const { edit, save } = this.props;
 		return (
 			<React.Fragment>
-				<button className={classes.editButton} onClick={save}>
+				<Button color="primary" onClick={save}>
 					Save
-				</button>
-				<button className={classes.editButton} onClick={() => edit(null)}>
+				</Button>
+				<Button color="primary" onClick={() => edit(null)}>
 					Cancel
-				</button>
+				</Button>
 			</React.Fragment>
 		);
 	}
