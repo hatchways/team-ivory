@@ -15,6 +15,7 @@ import User from './pages/User';
 import Profile from './pages/Profile';
 import Cart from './pages/Cart';
 import AppNavbar from './base_components/Navbar';
+import ChangePassword from './pages/ChangePassword';
 
 import './App.css';
 
@@ -58,6 +59,7 @@ class App extends Component {
 						<Route exact path="/builder" component={BuilderPage} />
 						<Route exact path="/feed" component={Feed} />
 						<Route exact path="/cart" component={Cart} />
+						<Route exact path="/user/passwords/change" component={ChangePassword} />
 						<Route
 							exact
 							path="/login"
