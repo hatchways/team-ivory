@@ -62,6 +62,36 @@ router.post('/:username/favorites', ensureAuthenticated, (req, res) => {
 		});
 });
 
+router.post('/passwords/change', ensureAuthenticated, async (req, res, next) => {
+	const { oldPassword, newPassword } = req.body;
+	console.log(oldPassword, newPassword);
+	console.log(req.user);
+	if (oldPassword == null || !(await bcrypt.compare(oldPassword, req.user.password))) {
+		console.info('Password update request with incorrect current password.');
+		return res.status(400).send({ message: 'Incorrect old password' });
+	}
+
+	if (newPassword == null)
+		return res.status(400).send({ message: 'New password cannot be emtpy' });
+
+	const hash = await bcrypt.hash(newPassword, 10);
+	models.users
+		.update(
+			{ password: hash },
+			{ returning: true, fields: ['password'], where: { id: req.user.id } }
+		)
+		.then(async result => {
+			let user;
+			for (let i in result) {
+				if (result[i][0]) user = result[i][0]['dataValues'];
+			}
+			// Update cookie to reflect the change
+			const token = await jwt.generateToken(user);
+			res.cookie('jwt', token);
+			res.status(200).send({ message: 'Password updated' });
+		});
+});
+
 router.post('/update', ensureAuthenticated, async (req, res, next) => {
 	console.info(req.body);
 	const { field, value } = req.body;
