@@ -104,7 +104,7 @@ export default function RecipeCard(props) {
 					</Avatar>
 				}
 				title={props.recipe.name}
-				subheader="September 14, 2016"
+				subheader={props.recipe.created}
 				action={
 					<IconButton aria-label="settings" onClick={handleAdToCart}>
 						<AddShoppingCartIcon />

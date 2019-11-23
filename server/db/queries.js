@@ -10,12 +10,12 @@ const countFavorites = recipe => {
 		});
 };
 
-const allRecipesWithFavorites = () => {
+const allRecipesWithFavorites = async userId => {
 	models.recipes.hasMany(models.favorites, {
 		foreignKey: 'recipeId',
 	});
 
-	return models.recipes.findAll({
+	const allRecipes = await models.recipes.findAll({
 		include: [
 			{ model: models.ingredients },
 			{
@@ -24,6 +24,43 @@ const allRecipesWithFavorites = () => {
 		],
 		order: [['id', 'ASC']],
 	});
+
+	const mappedRecipes = await Promise.all(
+		allRecipes.map(async recipe => {
+			console.log('THIS RUNS THIS RUNS');
+			const likes = await countFavorites(recipe);
+			return {
+				id: recipe.id,
+				user: recipe.userId,
+				name: recipe.name,
+				imageUrl: recipe.image.replace('public', ''),
+				steps: recipe.steps,
+				tags: recipe.tags,
+				//checks if there is a favorites relationship and then checks if the relationship belongs to current user
+				favorited: recipe.favorites[0]
+					? recipe.favorites.some(
+							favorite =>
+								favorite.userId === userId &&
+								favorite.favorited === 1
+					  )
+						? 1
+						: 0
+					: 0,
+				likes: likes,
+				created: recipe.createdAt,
+				ingredients: recipe.ingredients.map(ingredient => {
+					return {
+						ingredient: {
+							label: ingredient.name,
+						},
+						quantity: ingredient.quantity,
+						unit: { label: ingredient.unit },
+					};
+				}),
+			};
+		})
+	);
+	return mappedRecipes;
 };
 
 module.exports = {
