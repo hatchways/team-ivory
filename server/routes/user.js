@@ -3,6 +3,7 @@ const router = express.Router();
 const passport = require('passport');
 const bcrypt = require('bcrypt');
 const models = require('../models');
+const queries = require('../db/queries');
 const jwt = require('../config/jwt')['jwtManager'];
 const { ensureAuthenticated } = require('../config/auth');
 
@@ -87,6 +88,22 @@ router.post('/:username/favorites', ensureAuthenticated, async (req, res) => {
 		res.json({ favorited: updateTo });
 	}
 });
+
+router.post(
+	'/:username/favorites/delete',
+	ensureAuthenticated,
+	async (req, res) => {
+		console.log('removing favorite');
+
+		const result = await queries.removeFavorite(
+			req.user.id,
+			req.body.recipeId
+		);
+		console.log(result);
+
+		res.json(result);
+	}
+);
 
 router.post('/passwords/change', ensureAuthenticated, async (req, res, next) => {
 	const { oldPassword, newPassword } = req.body;

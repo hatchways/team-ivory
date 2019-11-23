@@ -63,7 +63,37 @@ const allRecipesWithFavorites = async userId => {
 	return mappedRecipes;
 };
 
+const removeFavorite = async (userId, recipeId) => {
+	const result = await models.favorites.update(
+		{
+			favorited: 0,
+		},
+		{ where: { userId: userId, recipeId: recipeId } }
+	);
+	return result;
+};
+
+const usersFavorites = async userId => {
+	// Create association
+	models.favorites.belongsTo(models.recipes, { foreign_key: 'recipeId' });
+
+	// Find all favorites by current user and joins the recipe to each favorite
+	const recipes = await models.favorites.findAll({
+		include: {
+			model: models.recipes,
+		},
+		where: { userId: req.user.id, favorited: 1 },
+	});
+	// console.log(recipes.)
+	// .then(function(recipes) {
+	// 	console.log(recipes.length)
+	// 	const favorites = recipes.map(recipe => recipe.dataValues);
+	// 	res.status(200).send({ favorites });
+	// });
+};
+
 module.exports = {
 	countFavorites,
 	allRecipesWithFavorites,
+	removeFavorite,
 };
