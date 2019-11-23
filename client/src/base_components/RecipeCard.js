@@ -45,7 +45,7 @@ export default function RecipeCard(props) {
 
   useEffect(()=> {
     setFavorited(props.recipe.favorited)
-  }, [])
+  }, [props.recipe.favorited])
 
 	const handleExpandClick = () => {
 		setExpanded(!expanded);
@@ -107,15 +107,15 @@ export default function RecipeCard(props) {
 				title={props.recipe.name}
 			/>
 			<CardActions disableSpacing style={{ flexWrap: 'wrap' }}>
-				<IconButton aria-label="add to favorites">
+				<IconButton onClick={handleFavorite} aria-label="add to favorites">
 					{favorited ? (
-						<FavoriteIcon color="error" onClick={handleFavorite} />
+						<FavoriteIcon color="error" />
 					) : (
-						<FavoriteIcon onClick={handleFavorite} />
+						<FavoriteIcon />
 					)}
 				</IconButton>
 				{props.recipe.tags.map((tag, index) => (
-					<a href="" key={index}>
+					<a href="/#" key={index}>
 						#{tag}
 					</a>
 				))}

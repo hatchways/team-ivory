@@ -24,7 +24,7 @@ const Favorites = ({ user }) => {
 			{user ? <h1>{user.name}'s Favorites!</h1> : ''}
 			{fetched ? favoritesArray.map(favorite => (
 				<p>
-					<img src={favorite.recipe.image} style={{ width: "200px" }} /> {favorite.recipe.name}{" "}
+					<img src={favorite.recipe.image} style={{ width: "200px" }} alt={favorite.recipe.name} /> {favorite.recipe.name}{" "}
 				</p>
 			)) : <h1>Loading Favorites...</h1>}
 		</div>

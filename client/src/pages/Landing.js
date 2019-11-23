@@ -1,11 +1,7 @@
 import React, { Component } from "react";
 
-import { Typography } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
-import { Route, Link } from "react-router-dom";
 import Feed from '../base_components/Feed'
-
-import Ping from "./Ping";
 
 const landinPageStyle = theme => ({
   landingContainer: {

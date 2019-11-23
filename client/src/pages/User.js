@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import RecipeCard from '../base_components/RecipeCard';
 import { Link } from 'react-router-dom';
 
-import { Typography } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 
 import Favorites from './Favorites';
@@ -106,7 +105,7 @@ class User extends Component {
 		const { user } = this.props;
 		const { recipes } = this.state;
 		let ownProfile = false;
-		if (user && user.user == urlUser) {
+		if (user && user.user === urlUser) {
 			ownProfile = true;
 		}
 		console.log(ownProfile);

@@ -18,6 +18,7 @@ export default function Feed(props) {
 			{props.recipes.length > 0
 				? props.recipes.map(recipe => (
 						<RecipeCard
+							key={recipe.id}
 							recipe={recipe}
 							user={props.user}
 							className={classes.recipeCard}
