@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 
 import { TextField, Button } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
-import { Route, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const signupPageStyle = theme => ({
 	form: {
@@ -58,7 +58,7 @@ class Signup extends Component {
 		});
 		const data = await res.json();
 		console.log(data);
-		if (res.status == 200) {
+		if (res.status === 200) {
 			this.props.history.push('/login');
 		}
 	}
