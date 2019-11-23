@@ -97,7 +97,7 @@ class SignedIn extends Component {
 						<Dropdown.Item href={`/user/${this.props.username}`}>
 							{this.props.username}
 						</Dropdown.Item>
-						<Dropdown.Item /*href={'/user/favorites'}*/>
+						<Dropdown.Item href={`/user/${this.props.username}/favorites`}>
 							Favorites
 						</Dropdown.Item>
 						<Dropdown.Item href={'/profile'}>

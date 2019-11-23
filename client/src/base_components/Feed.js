@@ -1,13 +1,13 @@
-import React from "react";
-import { makeStyles } from "@material-ui/core/styles";
+import React from 'react';
+import { makeStyles } from '@material-ui/core/styles';
 
-import RecipeCard from "./RecipeCard";
+import RecipeCard from './RecipeCard';
 
 const useStyles = makeStyles(theme => ({
 	recipeCard: {
-		marginTop: "2rem",
-		margin: "auto"
-	}
+		marginTop: '2rem',
+		margin: 'auto',
+	},
 }));
 
 export default function Feed(props) {
@@ -15,7 +15,15 @@ export default function Feed(props) {
 
 	return (
 		<div>
-			{props.recipes.length > 0 ? props.recipes.map(recipe => <RecipeCard recipe={recipe} className={classes.recipeCard} />) : ""}
+			{props.recipes.length > 0
+				? props.recipes.map(recipe => (
+						<RecipeCard
+							recipe={recipe}
+							user={props.user}
+							className={classes.recipeCard}
+						/>
+				  ))
+				: ''}
 		</div>
 	);
 }

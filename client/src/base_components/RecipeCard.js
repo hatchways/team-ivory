@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import Card from '@material-ui/core/Card';
@@ -15,104 +15,138 @@ import FavoriteIcon from '@material-ui/icons/Favorite';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
 
-
 const useStyles = makeStyles(theme => ({
 	card: {
-		maxWidth: 500
+		maxWidth: 500,
 	},
 	media: {
 		height: 0,
-		paddingTop: "56.25%" // 16:9
+		paddingTop: '56.25%', // 16:9
 	},
 	expand: {
-		transform: "rotate(0deg)",
-		marginLeft: "auto",
-		transition: theme.transitions.create("transform", {
-			duration: theme.transitions.duration.shortest
-		})
+		transform: 'rotate(0deg)',
+		marginLeft: 'auto',
+		transition: theme.transitions.create('transform', {
+			duration: theme.transitions.duration.shortest,
+		}),
 	},
 	expandOpen: {
-		transform: "rotate(180deg)"
+		transform: 'rotate(180deg)',
 	},
 	avatar: {
-		backgroundColor: red[500]
-	}
+		backgroundColor: red[500],
+	},
 }));
 
 export default function RecipeCard(props) {
 	const classes = useStyles();
-	const [expanded, setExpanded] = React.useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [favorited, setFavorited] = useState(0);
 
-  const handleExpandClick = () => {
-    setExpanded(!expanded);
-  };
+  useEffect(()=> {
+    setFavorited(props.recipe.favorited)
+  }, [])
 
-  const handleAdToCart = () => {
-    fetch('api/cart', {
-        method: 'post',
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          recipeId: props.recipe.id
-        })
-    }).then((res)=>{
-        return res.json() 
-    }).then((cart)=>{
-        console.log(cart)
-    })
-  }
-  return (
-    <Card className={classes.card+' '+props.className} id={props.id}>
-      <CardHeader
-        avatar={
-          <Avatar aria-label="recipe" className={classes.avatar}>
-            {props.recipe.name.charAt(0)}
-          </Avatar>
-        }
-        title={props.recipe.name}
-        subheader="September 14, 2016"
-        action={
-          <IconButton aria-label="settings" onClick={handleAdToCart}>
-            <AddShoppingCartIcon />
-          </IconButton>
-        }
-      />
-      <CardMedia
-        className={classes.media}
-        image={props.recipe.imageUrl}
-        title={props.recipe.name}
-      />
-      <CardActions disableSpacing style={{flexWrap: 'wrap'}}>
-        <IconButton aria-label="add to favorites">
-          {props.recipe.favorited ? <FavoriteIcon color="error" /> : <FavoriteIcon />}
-        </IconButton>
-        {props.recipe.tags.map((tag, index) => (
-            <a href='' key={index}>#{tag}</a>
-        ))}
-        <IconButton
-          className={clsx(classes.expand, {
-            [classes.expandOpen]: expanded,
-          })}
-          onClick={handleExpandClick}
-          aria-expanded={expanded}
-          aria-label="show more"
-        >
-          <ExpandMoreIcon />
-        </IconButton>
-      </CardActions>
-      <Collapse in={expanded} timeout="auto" unmountOnExit>
-        <CardContent>
-          <Typography paragraph>Ingredients:</Typography>
-          {props.recipe.ingredients.map((ingredient, index)=>(
-              <Typography paragraph key={index}>{ingredient.quantity} {ingredient.unit.label}{ingredient.quantity>1&&'s'} of {ingredient.ingredient.label}</Typography>
-          ))}
-          <Typography paragraph>Steps:</Typography>
-          {props.recipe.steps.map((step, index)=>(
-              <Typography paragraph key={index}>{index+1}. {step}</Typography>
-          ))}
-        </CardContent>
-      </Collapse>
-    </Card>
-  );
+	const handleExpandClick = () => {
+		setExpanded(!expanded);
+	};
+
+	const handleAdToCart = () => {
+		fetch('api/cart', {
+			method: 'post',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				recipeId: props.recipe.id,
+			}),
+		})
+			.then(res => {
+				return res.json();
+			})
+			.then(cart => {
+				console.log(cart);
+			});
+	};
+
+	const handleFavorite = async() => {
+		const updateFavorite = await fetch(`/user/${props.user.user}/favorites`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				userId: props.user.id,
+				recipeId: props.recipe.id,
+				favorited: favorited,
+			}),
+    });
+    const response = await updateFavorite.json();
+    setFavorited(response.favorited)
+	};
+
+	return (
+		<Card className={classes.card + ' ' + props.className} id={props.id}>
+			<CardHeader
+				avatar={
+					<Avatar aria-label="recipe" className={classes.avatar}>
+						{props.recipe.name.charAt(0)}
+					</Avatar>
+				}
+				title={props.recipe.name}
+				subheader="September 14, 2016"
+				action={
+					<IconButton aria-label="settings" onClick={handleAdToCart}>
+						<AddShoppingCartIcon />
+					</IconButton>
+				}
+			/>
+			<CardMedia
+				className={classes.media}
+				image={props.recipe.imageUrl}
+				title={props.recipe.name}
+			/>
+			<CardActions disableSpacing style={{ flexWrap: 'wrap' }}>
+				<IconButton aria-label="add to favorites">
+					{favorited ? (
+						<FavoriteIcon color="error" onClick={handleFavorite} />
+					) : (
+						<FavoriteIcon onClick={handleFavorite} />
+					)}
+				</IconButton>
+				{props.recipe.tags.map((tag, index) => (
+					<a href="" key={index}>
+						#{tag}
+					</a>
+				))}
+				<IconButton
+					className={clsx(classes.expand, {
+						[classes.expandOpen]: expanded,
+					})}
+					onClick={handleExpandClick}
+					aria-expanded={expanded}
+					aria-label="show more">
+					<ExpandMoreIcon />
+				</IconButton>
+			</CardActions>
+			<Collapse in={expanded} timeout="auto" unmountOnExit>
+				<CardContent>
+					<Typography paragraph>Ingredients:</Typography>
+					{props.recipe.ingredients.map((ingredient, index) => (
+						<Typography paragraph key={index}>
+							{ingredient.quantity} {ingredient.unit.label}
+							{ingredient.quantity > 1 && 's'} of{' '}
+							{ingredient.ingredient.label}
+						</Typography>
+					))}
+					<Typography paragraph>Steps:</Typography>
+					{props.recipe.steps.map((step, index) => (
+						<Typography paragraph key={index}>
+							{index + 1}. {step}
+						</Typography>
+					))}
+				</CardContent>
+			</Collapse>
+		</Card>
+	);
 }

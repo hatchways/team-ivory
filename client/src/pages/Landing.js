@@ -42,7 +42,7 @@ class LandingPage extends Component {
     const { classes } = this.props;
     return (
       <div className={classes.landingContainer}>
-        <Feed recipes={this.state.recipes} />
+        <Feed recipes={this.state.recipes} user={this.props.user} />
       </div>
     );
   }

@@ -40,7 +40,7 @@ router.get('/:username', (req, res, next) => {
 	});
 });
 
-router.post('/:username/favorites', ensureAuthenticated, (req, res) => {
+router.get('/:username/favorites', ensureAuthenticated, (req, res) => {
 	console.log("User's favorites");
 	console.log('user id', req.user.id);
 
@@ -56,10 +56,36 @@ router.post('/:username/favorites', ensureAuthenticated, (req, res) => {
 			where: { userId: req.user.id, favorited: 1 },
 		})
 		.then(function(recipes) {
-			console.log('RECIPES', recipes);
+			console.log(recipes.length)
 			const favorites = recipes.map(recipe => recipe.dataValues);
 			res.status(200).send({ favorites });
 		});
+});
+
+router.post('/:username/favorites', ensureAuthenticated, async (req, res) => {
+	const updateTo = req.body.favorited ? 0 : 1;
+	const query = await models.favorites.findAll({
+		where: { userId: req.body.userId, recipeId: req.body.recipeId },
+	});
+
+	if (!query[0]) {
+		console.log('time to insert');
+		const result = await models.favorites.create({
+			userId: req.body.userId,
+			recipeId: req.body.recipeId,
+			favorited: 1,
+		});
+		res.json({ favorited: 1 });
+	} else {
+		console.log('time to update');
+		const result = await models.favorites.update(
+			{
+				favorited: updateTo,
+			},
+			{ where: { id: query[0].dataValues.id } }
+		);
+		res.json({ favorited: updateTo });
+	}
 });
 
 router.post('/passwords/change', ensureAuthenticated, async (req, res, next) => {
