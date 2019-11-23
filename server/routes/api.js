@@ -18,6 +18,30 @@ var imageUpload = multer({
 	}),
 }).single('image');
 
+//placeholder to check for recipe upload
+router.get('/recipes', ensureAuthenticated, async function(req, res, next) {
+	if ('id' in req.query) {
+		const { id } = req.query;
+
+		models.recipes
+			.findOne({
+				where: { id: id },
+			})
+			.then(recipe => {
+				res.status(200).send({
+					recipe: {
+						name: recipe.name,
+						imageUrl: recipe.image.replace('public', ''),
+					},
+				});
+			});
+	} else {
+		const allRecipes = await queries.allRecipesWithFavorites(req.user.id);
+	
+		res.status(200).send(allRecipes);
+	}
+});
+
 //post handler for the recipe builder
 router.post('/recipes', imageUpload, async function(req, res, next) {
 	const { name } = req.body;
@@ -57,119 +81,6 @@ router.post('/recipes', imageUpload, async function(req, res, next) {
 				res.status(200).send({ response: `Successfully added recipe `, id: newRecipe.id });
 			});
 	});
-});
-
-//placeholder to check for recipe upload
-router.get('/recipes', ensureAuthenticated, async function(req, res, next) {
-	if ('id' in req.query) {
-		const { id } = req.query;
-
-		models.recipes
-			.findOne({
-				where: { id: id },
-			})
-			.then(recipe => {
-				res.status(200).send({
-					recipe: {
-						name: recipe.name,
-						imageUrl: recipe.image.replace('public', ''),
-					},
-				});
-			});
-	} else {
-		const allRecipes = await queries.allRecipesWithFavorites(req.user.id);
-	
-		res.status(200).send(allRecipes);
-	}
-});
-
-//post handler for the recipe builder
-router.post('/recipes', ensureAuthenticated, imageUpload, async function(req, res, next) {
-	const { name } = req.body;
-	const steps = JSON.parse(req.body.steps); //decode the steps tags and ingredients
-	const tags = JSON.parse(req.body.tags);
-	const ingredients = JSON.parse(req.body.ingredients);
-
-	//make all the tags
-	Promise.all(
-		tags.map(tagString => {
-			return models.tags
-				.create({
-					name: tagString,
-					createdAt: Date.now(),
-					updatedAt: Date.now(),
-				})
-				.then(tag => {
-					return tag.id;
-				});
-		})
-	).then(tagIds => {
-		//then use those ids to create a recipe
-		models.recipes
-			.create({
-				userId: 1,
-				name: name,
-				image: req.file.path,
-				steps: steps,
-				tags: tagIds,
-				ingredients: ingredients.map(ingredient => {
-					return ingredient.ingredient.label;
-				}),
-				createdAt: Date.now(),
-				updatedAt: Date.now(),
-			})
-			.then(newRecipe => {
-				ingredients.map(ingredient => {
-					newRecipe.createIngredient({
-						name: ingredient.ingredient.label,
-						quantity: ingredient.quantity,
-						unit: ingredient.unit.value,
-						outsideId: ingredient.ingredient.value,
-					});
-				});
-				res.status(200).send({ response: `Successfully added recipe `, id: newRecipe.id });
-			});
-	});
-});
-
-//placeholder to check for recipe upload
-router.get('/recipes', function(req, res, next) {
-	if ('id' in req.query) {
-		const { id } = req.query;
-
-		models.recipes
-			.findOne({
-				where: { id: id },
-			})
-			.then(recipe => {
-				res.status(200).send({
-					recipe: {
-						name: recipe.name,
-						imageUrl: recipe.image.replace('public', ''),
-					},
-				});
-			});
-	} else {
-		models.recipes.findAll({ include: [models.ingredients] }).then(recipes => {
-			res.status(200).send(
-				recipes.map(recipe => {
-					console.log(recipe.ingredients);
-					return {
-						id: recipe.id,
-						user: recipe.userId,
-						name: recipe.name,
-						imageUrl: recipe.image.replace('public', ''),
-						steps: recipe.steps,
-						tags: recipe.tags,
-						created: recipe.createdAt,
-						ingredients: recipe.ingredients.map(ingredient => {
-							return { ingredient: { label: ingredient.name }, quantity: ingredient.quantity, unit: { label: ingredient.unit } };
-						}),
-					};
-				})
-			);
-		});
-	}
 });
 
 router.post('/cart', ensureAuthenticated, function(req, res, next) {
