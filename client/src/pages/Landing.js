@@ -18,8 +18,10 @@ class LandingPage extends Component {
 		step: 0,
 		recipes: [],
 		sorted: false,
-		sortedBy: null,
-		sortDirection: 'desc',
+		sortedBy: '',
+		sortDirection: '',
+		searched: false,
+		searchedRecipes: [],
 	};
 
 	componentDidMount() {
@@ -41,7 +43,21 @@ class LandingPage extends Component {
 		this.setState(prevState => ({ step: (prevState.step += 1) }));
 	};
 
-	sort = e => {
+	handleSearch = e => {
+		e.preventDefault();
+		const searchTerm = e.target.value.toLowerCase();
+		const searchedRecipes = this.state.recipes.filter(recipe =>
+			recipe.name.toLowerCase().includes(searchTerm)
+		);
+		this.setState({
+			searchedRecipes: searchedRecipes,
+			searched: true,
+			sorted: false,
+			sortedBy: '',
+		});
+	};
+
+	handleSort = e => {
 		let sortBy;
 		let direction;
 		if (e.target.value === 'asc' || e.target.value === 'desc') {
@@ -49,23 +65,58 @@ class LandingPage extends Component {
 			direction = e.target.value;
 		} else {
 			sortBy = e.target.value;
-			direction = this.state.sortDirection;
+			direction = 'desc';
 		}
+		const recipes = this.state.searched
+			? this.state.searchedRecipes
+			: this.state.recipes;
 
-		const sortedRecipes = utils.sort(this.state.recipes, sortBy, direction);
-		this.setState({
-			recipes: sortedRecipes,
-			sorted: true,
-			sortedBy: sortBy,
-			sortDirection: direction,
-		});
+		const sortedRecipes = utils.sort(recipes, sortBy, direction);
+		this.state.searched
+			? this.setState({
+					searchedRecipes: sortedRecipes,
+					sorted: true,
+					sortedBy: sortBy,
+					sortDirection: direction,
+			  })
+			: this.setState({
+					recipes: sortedRecipes,
+					sorted: true,
+					sortedBy: sortBy,
+					sortDirection: direction,
+			  });
 	};
 
 	render() {
-		const { classes } = this.props;
+		const { classes, user } = this.props;
+		const {
+			recipes,
+			searched,
+			searchedRecipes,
+			sorted,
+			sortedBy,
+			sortDirection,
+		} = this.state;
+		let asc = 'Ascending';
+		let desc = 'Descending';
+		if (sortedBy === 'id') {
+			asc = 'Oldest';
+			desc = 'Newest';
+		}
+		if (sortedBy === 'name') {
+			asc = 'A-Z';
+			desc = 'Z-A';
+		}
+		if (sortedBy === 'likes') {
+			asc = 'Lowest';
+			desc = 'Highest';
+		}
 		return (
 			<div className={classes.landingContainer}>
-				<select onChange={this.sort}>
+				<input
+					placeholder="Search by name"
+					onChange={this.handleSearch}></input>{' '}
+				<select value={sortedBy} onChange={this.handleSort}>
 					<option value="" selected disabled>
 						Sort By
 					</option>
@@ -73,17 +124,22 @@ class LandingPage extends Component {
 					<option value="id">Date Created</option>
 					<option value="likes">Popularity</option>
 				</select>{' '}
-				{this.state.sorted ? (
-					<select onChange={this.sort}>
-						<option value="asc">Ascending</option>
-						<option value="desc" selected>
-							Descending
-						</option>
-					</select>
-				) : (
-					''
-				)}
-				<Feed recipes={this.state.recipes} user={this.props.user} />
+				<select
+					value={sortDirection}
+					disabled={!sorted}
+					onChange={this.handleSort}>
+					<option value="" selected disabled>
+						Direction
+					</option>
+					<option value="asc">{asc}</option>
+					<option value="desc" selected>
+						{desc}
+					</option>
+				</select>
+				<Feed
+					recipes={searched ? searchedRecipes : recipes}
+					user={user}
+				/>
 			</div>
 		);
 	}
