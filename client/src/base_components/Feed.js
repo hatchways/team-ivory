@@ -1,6 +1,6 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-
+import utils from '../utils';
 import RecipeCard from './RecipeCard';
 
 const useStyles = makeStyles(theme => ({
@@ -13,18 +13,21 @@ const useStyles = makeStyles(theme => ({
 export default function Feed(props) {
 	const classes = useStyles();
 
+	const recipeCards =
+		props.recipes.length > 0
+			? props.recipes.map(recipe => (
+					<RecipeCard
+						key={recipe.id}
+						recipe={recipe}
+						user={props.user}
+						className={classes.recipeCard}
+					/>
+			  ))
+			: '';
+
 	return (
 		<div>
-			{props.recipes.length > 0
-				? props.recipes.map(recipe => (
-						<RecipeCard
-							key={recipe.id}
-							recipe={recipe}
-							user={props.user}
-							className={classes.recipeCard}
-						/>
-				  ))
-				: ''}
+			{recipeCards}
 		</div>
 	);
 }
