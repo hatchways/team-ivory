@@ -40,12 +40,14 @@ const useStyles = makeStyles(theme => ({
 
 export default function RecipeCard(props) {
 	const classes = useStyles();
-  const [expanded, setExpanded] = useState(false);
+	const [expanded, setExpanded] = useState(false);
   const [favorited, setFavorited] = useState(0);
+  const [likes, setLikes] = useState(0)
 
-  useEffect(()=> {
-    setFavorited(props.recipe.favorited)
-  }, [props.recipe.favorited])
+	useEffect(() => {
+    setFavorited(props.recipe.favorited);
+    setLikes(props.recipe.likes)
+  }, [props]);
 
 	const handleExpandClick = () => {
 		setExpanded(!expanded);
@@ -69,20 +71,28 @@ export default function RecipeCard(props) {
 			});
 	};
 
-	const handleFavorite = async() => {
-		const updateFavorite = await fetch(`/user/${props.user.user}/favorites`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({
-				userId: props.user.id,
-				recipeId: props.recipe.id,
-				favorited: favorited,
-			}),
-    });
+	const handleFavorite = async () => {
+		const updateFavorite = await fetch(
+			`/user/${props.user.user}/favorites`,
+			{
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					userId: props.user.id,
+					recipeId: props.recipe.id,
+					favorited: favorited,
+				}),
+			}
+		);
     const response = await updateFavorite.json();
-    setFavorited(response.favorited)
+    if (response.favorited === 0) {
+      setLikes(likes - 1);
+    } else {
+      setLikes(likes + 1);
+    }
+		setFavorited(response.favorited);
 	};
 
 	return (
@@ -107,13 +117,16 @@ export default function RecipeCard(props) {
 				title={props.recipe.name}
 			/>
 			<CardActions disableSpacing style={{ flexWrap: 'wrap' }}>
-				<IconButton onClick={handleFavorite} aria-label="add to favorites">
+				<IconButton
+					onClick={handleFavorite}
+					aria-label="add to favorites">
 					{favorited ? (
 						<FavoriteIcon color="error" />
 					) : (
 						<FavoriteIcon />
 					)}
 				</IconButton>
+				{likes}&nbsp;
 				{props.recipe.tags.map((tag, index) => (
 					<a href="/#" key={index}>
 						#{tag}

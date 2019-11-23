@@ -3,7 +3,7 @@ var models = require('../models');
 const countFavorites = recipe => {
 	return models.favorites
 		.findAll({
-			where: { recipeId: recipe.id },
+			where: { recipeId: recipe.id, favorited: 1 },
 		})
 		.then(likes => {
 			return likes.length;
