@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var models = require('../models');
 var multer = require('multer');
+const queries = require('../db/queries');
 const path = require('path');
 const { ensureAuthenticated } = require('../config/auth');
 
@@ -125,7 +126,7 @@ router.post('/recipes', imageUpload, async function(req, res, next) {
 // });
 
 //placeholder to check for recipe upload
-router.get('/recipes', ensureAuthenticated, function(req, res, next) {
+router.get('/recipes', ensureAuthenticated, async function(req, res, next) {
 	if ('id' in req.query) {
 		const { id } = req.query;
 
@@ -142,46 +143,42 @@ router.get('/recipes', ensureAuthenticated, function(req, res, next) {
 				});
 			});
 	} else {
-		models.recipes.hasMany(models.favorites, { foreignKey: 'recipeId' });
-
-		models.recipes
-			.findAll({
-				include: [
-					{ model: models.ingredients },
-					{
-						model: models.favorites,
-						// , where: { userId: req.user.id }
-					},
-				],
-				order: [['id', 'ASC']],
-			})
-			.then(recipes => {
-				res.status(200).send(
-					recipes.map(recipe => {
-						// console.log(recipe.ingredients)
+		const allRecipes = await queries.allRecipesWithFavorites();
+		const mappedRecipes = await Promise.all(
+			allRecipes.map(async recipe => {
+				const likes = await queries.countFavorites(recipe);
+				return {
+					id: recipe.id,
+					user: recipe.userId,
+					name: recipe.name,
+					imageUrl: recipe.image.replace('public', ''),
+					steps: recipe.steps,
+					tags: recipe.tags,
+					//checks if there is a favorites relationship and then checks if the relationship belongs to current user
+					favorited: recipe.favorites[0]
+						? recipe.favorites.some(
+								favorite =>
+									favorite.userId === req.user.id &&
+									favorite.favorited === 1
+						  )
+							? 1
+							: 0
+						: 0,
+					likes: likes,
+					created: recipe.createdAt,
+					ingredients: recipe.ingredients.map(ingredient => {
 						return {
-							id: recipe.id,
-							user: recipe.userId,
-							name: recipe.name,
-							imageUrl: recipe.image.replace('public', ''),
-							steps: recipe.steps,
-							tags: recipe.tags,
-							//checks if there is a favorites relationship and then checks if the relationship belongs to current user
-							favorited: recipe.dataValues.favorites[0]
-								? recipe.dataValues.favorites.some(
-										favorite => favorite.dataValues.userId === req.user.id && favorite.dataValues.favorited === 1
-								  )
-									? 1
-									: 0
-								: 0,
-							created: recipe.createdAt,
-							ingredients: recipe.ingredients.map(ingredient => {
-								return { ingredient: { label: ingredient.name }, quantity: ingredient.quantity, unit: { label: ingredient.unit } };
-							}),
+							ingredient: {
+								label: ingredient.name,
+							},
+							quantity: ingredient.quantity,
+							unit: { label: ingredient.unit },
 						};
-					})
-				);
-			});
+					}),
+				};
+			})
+		);
+		res.status(200).send(mappedRecipes);
 	}
 });
 
