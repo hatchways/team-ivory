@@ -27,7 +27,6 @@ const allRecipesWithFavorites = async userId => {
 
 	const mappedRecipes = await Promise.all(
 		allRecipes.map(async recipe => {
-			console.log('THIS RUNS THIS RUNS');
 			const likes = await countFavorites(recipe);
 			return {
 				id: recipe.id,
@@ -73,6 +72,7 @@ const removeFavorite = async (userId, recipeId) => {
 	return result;
 };
 
+//WIP
 const usersFavorites = async userId => {
 	// Create association
 	models.favorites.belongsTo(models.recipes, { foreign_key: 'recipeId' });
@@ -92,8 +92,23 @@ const usersFavorites = async userId => {
 	// });
 };
 
+const usersFollowing = async userId => {
+	const query = await models.followers.findAll({
+		where: { followerId: userId },
+	});
+	const followers = query.map(follower => {
+		return {
+			userId: follower.userId,
+			followerID: follower.followerId,
+			status: follower.status,
+		};
+	});
+	return followers;
+};
+
 module.exports = {
 	countFavorites,
 	allRecipesWithFavorites,
 	removeFavorite,
+	usersFollowing,
 };

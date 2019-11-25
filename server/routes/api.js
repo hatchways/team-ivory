@@ -20,6 +20,8 @@ var imageUpload = multer({
 
 //placeholder to check for recipe upload
 router.get('/recipes', ensureAuthenticated, async function(req, res, next) {
+	const checkUsersFollowing = await queries.usersFollowing(req.user.id);
+	console.log(checkUsersFollowing)
 	if ('id' in req.query) {
 		const { id } = req.query;
 
@@ -35,7 +37,7 @@ router.get('/recipes', ensureAuthenticated, async function(req, res, next) {
 					},
 				});
 			});
-	} else if(req.user) {
+	} else if(req.user && checkUsersFollowing[0]) {
 		models.recipes.hasMany(models.favorites, { foreignKey: 'recipeId' });
 		models.followers.findAll({where:{followerId: req.user.id}}).then((followed)=>{
 			models.recipes
@@ -60,7 +62,7 @@ router.get('/recipes', ensureAuthenticated, async function(req, res, next) {
 							imageUrl: recipe.image.replace('public', ''),
 							steps: recipe.steps,
 							tags: recipe.tags,
-							//checks if there is a favorites relationship and then checks if the relationship belongs to current user
+							// checks if there is a favorites relationship and then checks if the relationship belongs to current user
 							favorited: recipe.dataValues.favorites[0]
 								? recipe.dataValues.favorites.some(
 										favorite => favorite.dataValues.userId === req.user.id && favorite.dataValues.favorited === 1
@@ -79,7 +81,7 @@ router.get('/recipes', ensureAuthenticated, async function(req, res, next) {
 		})
 	} else {
 		const allRecipes = await queries.allRecipesWithFavorites(req.user.id);
-	
+
 		res.status(200).send(allRecipes);
 	}
 });
