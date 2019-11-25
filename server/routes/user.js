@@ -30,12 +30,27 @@ router.get('/profile', ensureAuthenticated, (req, res, next) => {
 
 router.get('/:username', (req, res, next) => {
 	console.log('Requesting user profile');
-	console.log(req.params);
+	console.log(req.params);	 	
 	models.users.findOne({ where: { username: req.params.username } }).then(user => {
 		if (user) {
-			console.log(user.dataValues);
-			const { id, username, firstName, lastName, createdAt, email } = user.dataValues;
-			return res.status(200).send({ id, username, firstName, lastName, createdAt, email });
+			if(req.query.userId){
+				return models.followers.findOne({where: {userId:user.id, followerId:req.query.userId}}).then((follower)=>{
+					const { id, username, firstName, lastName, createdAt, email } = user.dataValues;
+					if(follower){
+						console.log('follower')
+						return res.status(200).send({ id, username, firstName, lastName, createdAt, email, followed:true });
+					}
+					else{
+						console.log('no follower')
+						return res.status(200).send({ id, username, firstName, lastName, createdAt, email, followed:false });
+					}
+				})
+			}
+			else{
+				console.log(user.dataValues);
+				const { id, username, firstName, lastName, createdAt, email } = user.dataValues;
+				return res.status(200).send({ id, username, firstName, lastName, createdAt, email, followed:false });
+			}
 		}
 		return res.status(400).send({ error: 'Requested user does not exist' });
 	});
