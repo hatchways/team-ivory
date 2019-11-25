@@ -6,7 +6,12 @@ module.exports = (sequelize, DataTypes) => {
     text: DataTypes.STRING
   }, {});
   comments.associate = function(models) {
-    // associations can be defined here
+    comments.belongsTo(models.recipes, {
+      foreignKey: 'recipeId',
+    });
+    comments.belongsTo(models.users, {
+      foreignKey: 'userId',
+    });
   };
   return comments;
 };

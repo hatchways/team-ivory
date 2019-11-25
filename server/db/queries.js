@@ -125,12 +125,29 @@ const usersFollowing = async userId => {
 
 const getRecipe = recipeId => {
 	const query = models.recipes.findOne({
-		// include: {
-		// 	model: models.ingredients,
-		// },
 		where: { id: recipeId },
 	});
 	return query;
+};
+
+const getComments = recipeId => {
+	const query = models.comments.findAll({
+		include: { model: models.users },
+		where: { recipeId: recipeId },
+		order: [['createdAt', 'desc']],
+	});
+	const comments = query.map(comment => {
+		return {
+			id: comment.id,
+			userId: comment.userId,
+			recipeId: comment.recipeId,
+			created: comment.createdAt,
+			updated: comment.updatedAt,
+			text: comment.text,
+			username: comment.user.dataValues.username,
+		};
+	});
+	return comments;
 };
 
 module.exports = {
@@ -139,5 +156,6 @@ module.exports = {
 	removeFavorite,
 	usersFavorites,
 	usersFollowing,
-	getRecipe
+	getRecipe,
+	getComments,
 };

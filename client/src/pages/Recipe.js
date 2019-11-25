@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import Comments from './Comments';
 
-const Recipe = () => {
-	const [recipe, setRecipe] = useState(null);
+const Recipe = (props) => {
+	const [recipeArray, setRecipeArray] = useState(null);
+	const [comments, setComments] = useState([])
+
 	useEffect(() => {
-		console.log(window.location.pathname);
 		fetchRecipe();
 	}, []);
 
@@ -15,28 +17,29 @@ const Recipe = () => {
 			if (!response.ok)
 				// or check for response.status
 				throw new Error(response.statusText);
-			const fetche = await response.json();
-			console.log(fetche);
-			setRecipe(fetche);
+			const { recipe, comments } = await response.json();
+			setRecipeArray(recipe);
+			setComments(comments)
 		} catch (e) {
 			console.error(e);
 		}
 	};
 	return (
 		<div>
-			{recipe ? (
+			{recipeArray ? (
 				<div>
-					<h1>{recipe.name}</h1>
-					<p>Created on : {recipe.createdAt}</p>
-					<p>Updated on : {recipe.updatedAt}</p>
+					<h1>{recipeArray.name}</h1>
+					<p>Created on : {recipeArray.createdAt}</p>
+					<p>Updated on : {recipeArray.updatedAt}</p>
 
-					<img src={recipe.image} alt={''} />
-					<p>steps: {recipe.steps.map(step => step)}</p>
-					<p>tags: {recipe.tags.map(tag => tag)}</p>
+					<img src={recipeArray.image} alt={''} />
+					<p>steps: {recipeArray.steps.map(step => step)}</p>
+					<p>tags: {recipeArray.tags.map(tag => tag)}</p>
 				</div>
 			) : (
 				<div>Loading...</div>
 			)}
+			<Comments recipe={recipeArray} comments={comments} user={props.user} />
 		</div>
 	);
 };
