@@ -3,7 +3,6 @@ import IconButton from '@material-ui/core/IconButton';
 import CancelIcon from '@material-ui/icons/Cancel';
 import { withStyles } from "@material-ui/core/styles";
 import Button from '@material-ui/core/Button';
-import { positions } from '@material-ui/system';
 
 //styling
 const cartPageStyle = theme => ({
@@ -66,7 +65,7 @@ class Cart extends Component {
             return res.json()
         }).then((json)=>{
             this.setState({
-                cart: this.state.cart.filter((item)=>{return item.id != itemId})
+                cart: this.state.cart.filter((item)=>{return item.id !== itemId})
             })
         })
     }

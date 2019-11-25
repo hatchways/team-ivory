@@ -2,11 +2,8 @@ import React, { Component } from 'react';
 import RecipeCard from '../base_components/RecipeCard';
 import { Link } from 'react-router-dom';
 
-import { Typography } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-
-import Favorites from './Favorites';
 
 const UserStyle = theme => ({
 	landingContainer: {
@@ -104,11 +101,6 @@ class User extends Component {
 		this.props.history.push('/login');
 	}
 
-	favorites() {
-		console.log('Clicked Favorites');
-		this.setState({ favorites: !this.state.favorites });
-	}
-
 	followUser = () => {
 		fetch('/api/followers', {
 			method: 'post',
@@ -130,7 +122,7 @@ class User extends Component {
 		const { user } = this.props;
 		const { recipes } = this.state;
 		let ownProfile = false;
-		if (user && user.user == urlUser) {
+		if (user && user.user === urlUser) {
 			ownProfile = true;
 		}
 		console.log(ownProfile);
@@ -158,17 +150,9 @@ class User extends Component {
 					<UserLinks
 						classes={classes}
 						signout={() => this.signout()}
-						favorites={() => this.favorites()}
 					/>
 				) : null}
 				{followSection}
-				<div>
-					{this.state.favorites ? (
-						<Favorites id={id} username={username} firstName={firstName} />
-					) : (
-						''
-					)}
-				</div>
 				<div>
 					<h2>{`${firstName}'s recipes:`}</h2>
 					{recipes.length > 0 ? (
@@ -189,7 +173,6 @@ class UserLinks extends Component {
 		const { classes } = this.props;
 		return (
 			<div className={classes.userLinks}>
-				<button onClick={this.props.favorites}>Favorites</button>
 				<button>Basket</button>
 				<button onClick={this.props.signout}>Sign out</button>
 				<Link to="/profile">Profile</Link>

@@ -92,12 +92,12 @@ class SignedIn extends Component {
 						size="sm"
 						variant="Success"
 						className="navbar-custom"
-						style={{ 'align-self': 'center', color: 'white' }}
+						style={{ 'alignSelf': 'center', color: 'white' }}
 						title={this.props.name}>
 						<Dropdown.Item href={`/user/${this.props.username}`}>
 							{this.props.username}
 						</Dropdown.Item>
-						<Dropdown.Item /*href={'/user/favorites'}*/>
+						<Dropdown.Item href={`/user/${this.props.username}/favorites`}>
 							Favorites
 						</Dropdown.Item>
 						<Dropdown.Item href={'/profile'}>

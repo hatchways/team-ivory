@@ -169,7 +169,7 @@ class BuilderPage extends Component {
   };
 
   handlePost = () => {
-    if (this.state.name != '' && this.state.ingredients.length && this.state.steps.length) {
+    if (this.state.name !== '' && this.state.ingredients.length && this.state.steps.length) {
       let formData = new FormData();
       formData.append('name', this.state.name);
       formData.append('ingredients', JSON.stringify(this.state.ingredients));
@@ -209,7 +209,7 @@ class BuilderPage extends Component {
   removeIngredient = targetIngredient => {
     this.setState({
       ingredients: this.state.ingredients.filter(ingredient => {
-        return ingredient != targetIngredient;
+        return ingredient !== targetIngredient;
       }),
     });
   };
@@ -217,7 +217,7 @@ class BuilderPage extends Component {
   removeStep = targetStep => {
     this.setState({
       steps: this.state.steps.filter(step => {
-        return step != targetStep;
+        return step !== targetStep;
       }),
     });
   };
@@ -225,7 +225,7 @@ class BuilderPage extends Component {
   removeTag = targetTag => {
     this.setState({
       tags: this.state.tags.filter(tag => {
-        return tag != targetTag;
+        return tag !== targetTag;
       }),
     });
   };

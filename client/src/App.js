@@ -16,6 +16,7 @@ import Profile from './pages/Profile';
 import Cart from './pages/Cart';
 import AppNavbar from './base_components/Navbar';
 import ChangePassword from './pages/ChangePassword';
+import Favorites from './pages/Favorites';
 
 import './App.css';
 
@@ -50,16 +51,34 @@ class App extends Component {
 	render() {
 		console.log('Rerending main app.');
 		const { user } = this.state;
+		console.log('APP', user);
 		return (
 			<MuiThemeProvider theme={theme}>
 				<BrowserRouter>
 					<AppNavbar user={user} logout={() => this.logout()} />
 					<div style={{ marginTop: '4rem' }}>
-						<Route exact path="/" component={LandingPage} />
+						<Route
+							exact
+							path="/"
+							render={props => (
+								<LandingPage {...props} user={user} />
+							)}
+						/>
 						<Route exact path="/builder" component={BuilderPage} />
 						<Route exact path="/feed" component={Feed} />
 						<Route exact path="/cart" component={Cart} />
-						<Route exact path="/user/passwords/change" component={ChangePassword} />
+						<Route
+							exact
+							path="/user/:username/favorites"
+							render={props => (
+								<Favorites {...props} user={user} />
+							)}
+						/>
+						<Route
+							exact
+							path="/user/passwords/change"
+							component={ChangePassword}
+						/>
 						<Route
 							exact
 							path="/login"
@@ -76,14 +95,21 @@ class App extends Component {
 							exact
 							path="/profile"
 							render={props => (
-								<Profile {...props} updateUser={() => this.updateUser()} />
+								<Profile
+									{...props}
+									updateUser={() => this.updateUser()}
+								/>
 							)}
 						/>
 						<Route
 							exact
 							path={`/user/:username`}
 							render={props => (
-								<User {...props} user={user} logout={() => this.logout()} />
+								<User
+									{...props}
+									user={user}
+									logout={() => this.logout()}
+								/>
 							)}
 						/>
 					</div>

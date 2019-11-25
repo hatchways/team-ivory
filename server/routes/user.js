@@ -3,6 +3,7 @@ const router = express.Router();
 const passport = require('passport');
 const bcrypt = require('bcrypt');
 const models = require('../models');
+const queries = require('../db/queries');
 const jwt = require('../config/jwt')['jwtManager'];
 const { ensureAuthenticated } = require('../config/auth');
 
@@ -55,7 +56,7 @@ router.get('/:username', (req, res, next) => {
 	});
 });
 
-router.post('/:username/favorites', ensureAuthenticated, (req, res) => {
+router.get('/:username/favorites', ensureAuthenticated, (req, res) => {
 	console.log("User's favorites");
 	console.log('user id', req.user.id);
 
@@ -71,11 +72,53 @@ router.post('/:username/favorites', ensureAuthenticated, (req, res) => {
 			where: { userId: req.user.id, favorited: 1 },
 		})
 		.then(function(recipes) {
-			console.log('RECIPES', recipes);
+			console.log(recipes.length)
 			const favorites = recipes.map(recipe => recipe.dataValues);
 			res.status(200).send({ favorites });
 		});
 });
+
+router.post('/:username/favorites', ensureAuthenticated, async (req, res) => {
+	const updateTo = req.body.favorited ? 0 : 1;
+	const query = await models.favorites.findAll({
+		where: { userId: req.body.userId, recipeId: req.body.recipeId },
+	});
+
+	if (!query[0]) {
+		console.log('time to insert');
+		const result = await models.favorites.create({
+			userId: req.body.userId,
+			recipeId: req.body.recipeId,
+			favorited: 1,
+		});
+		res.json({ favorited: 1 });
+	} else {
+		console.log('time to update');
+		const result = await models.favorites.update(
+			{
+				favorited: updateTo,
+			},
+			{ where: { id: query[0].dataValues.id } }
+		);
+		res.json({ favorited: updateTo });
+	}
+});
+
+router.post(
+	'/:username/favorites/delete',
+	ensureAuthenticated,
+	async (req, res) => {
+		console.log('removing favorite');
+
+		const result = await queries.removeFavorite(
+			req.user.id,
+			req.body.recipeId
+		);
+		console.log(result);
+
+		res.json(result);
+	}
+);
 
 router.post('/passwords/change', ensureAuthenticated, async (req, res, next) => {
 	const { oldPassword, newPassword } = req.body;
