@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 
 import { Typography } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
 
 import Favorites from './Favorites';
 
@@ -44,6 +45,7 @@ class User extends Component {
 		createdAt: '',
 		recipes: [],
 		favorites: false,
+		followed: false
 	};
 
 	// Set up initial user
@@ -63,7 +65,15 @@ class User extends Component {
 	// Get the user from the url and request data from server
 	async requestUser() {
 		const urlUser = this.props.location.pathname.split('/').pop();
-		const res = await fetch('/user/' + urlUser);
+		const res = await fetch('/user/' + urlUser, {
+			method: 'post',
+			headers: {
+			  "Content-Type": "application/json"
+			},
+			body: JSON.stringify({
+			  userId: this.props.user
+			})
+		});
 		console.log(res);
 		if (res.status >= 400 && res.status < 500) {
 			return this.props.history.push('/login');
@@ -99,6 +109,20 @@ class User extends Component {
 		this.setState({ favorites: !this.state.favorites });
 	}
 
+	followUser = () => {
+		fetch('/api/followers', {
+			method: 'post',
+			headers: {
+			  "Content-Type": "application/json"
+			},
+			body: JSON.stringify({
+			  followId: this.state.id
+			})
+		}).then((res)=>{
+			this.setState({followed:true})
+		})
+	}
+
 	render() {
 		const { classes } = this.props;
 		const { id, firstName, lastName, email, username } = this.state;
@@ -110,6 +134,16 @@ class User extends Component {
 			ownProfile = true;
 		}
 		console.log(ownProfile);
+
+		let followSection = ''
+		if(!ownProfile){
+			if(this.state.followed){
+				followSection = <Typography>Folllowed</Typography>
+			}
+			else{
+				followSection = <Button onClick={this.followUser}>Follow</Button>
+			}
+		}
 		return (
 			<div className={classes.landingContainer}>
 				<div className={classes.userCard}>
@@ -127,6 +161,7 @@ class User extends Component {
 						favorites={() => this.favorites()}
 					/>
 				) : null}
+				{followSection}
 				<div>
 					{this.state.favorites ? (
 						<Favorites id={id} username={username} firstName={firstName} />

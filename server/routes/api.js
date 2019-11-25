@@ -395,4 +395,15 @@ router.get('/recipes/:username', async (req, res, next) => {
 	});
 });
 
+router.post('/followers', ensureAuthenticated, function(req, res){
+	if(req.body.followId){
+		models.followers.create({
+			followerId: req.user.id,
+			userId: req.body.followId,
+			status: 0
+		}).then((follower)=>{
+			res.status(200).send({response: 'Successfully created follower relationship'})
+		})
+	}
+})
 module.exports = router;
