@@ -8,7 +8,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { theme } from './themes/theme';
 import LandingPage from './pages/Landing';
 import BuilderPage from './pages/Builder';
-import Feed from './base_components/Feed';
+import Feed from './pages/Feed';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import User from './pages/User';
@@ -64,7 +64,11 @@ class App extends Component {
 							render={props => <LandingPage {...props} user={user} />}
 						/>
 						<Route exact path="/builder" component={BuilderPage} />
-						<Route exact path="/feed" component={Feed} />
+						<Route
+							exact
+							path="/feed"
+							render={props => <Feed {...props} user={user} />}
+						/>
 						<Route exact path="/cart" component={Cart} />
 						<Route
 							exact

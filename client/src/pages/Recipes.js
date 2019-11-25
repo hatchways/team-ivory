@@ -1,7 +1,7 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import utils from '../utils';
-import RecipeCard from './RecipeCard';
+import RecipeCard from '../base_components/RecipeCard';
 
 const useStyles = makeStyles(theme => ({
 	recipeCard: {
@@ -10,7 +10,7 @@ const useStyles = makeStyles(theme => ({
 	},
 }));
 
-export default function Feed(props) {
+export default function Recipes(props) {
 	const classes = useStyles();
 
 	const recipeCards =
