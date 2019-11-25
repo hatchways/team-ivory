@@ -3,7 +3,7 @@
 module.exports = {
 	up: (queryInterface, Sequelize) => {
 		const comments = [
-      {
+			{
 				userId: 1,
 				recipeId: 1,
 				text: 'First',

@@ -9,7 +9,7 @@ router.get('/:recipeId', async (req, res, next) => {
 	console.log('Recipe route works!');
 	const recipe = await queries.getRecipe(req.params.recipeId);
 	const comments = await queries.getComments(req.params.recipeId);
-	console.log(comments.length)
+	console.log(comments.length);
 	res.json({ recipe, comments });
 });
 

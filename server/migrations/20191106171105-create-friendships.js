@@ -1,38 +1,38 @@
-"use strict";
+'use strict';
 module.exports = {
 	up: (queryInterface, Sequelize) => {
-		return queryInterface.createTable("friendships", {
+		return queryInterface.createTable('friendships', {
 			id: {
 				allowNull: false,
 				autoIncrement: true,
 				primaryKey: true,
-				type: Sequelize.INTEGER
+				type: Sequelize.INTEGER,
 			},
 			userOneId: {
 				type: Sequelize.INTEGER,
-				unique: "compositeIndex"
+				unique: 'compositeIndex',
 			},
 			userTwoId: {
 				type: Sequelize.INTEGER,
-				unique: "compositeIndex"
+				unique: 'compositeIndex',
 			},
 			status: {
-				type: Sequelize.INTEGER
+				type: Sequelize.INTEGER,
 			},
 			lastActionBy: {
-				type: Sequelize.INTEGER
+				type: Sequelize.INTEGER,
 			},
 			createdAt: {
 				allowNull: false,
-				type: Sequelize.DATE
+				type: Sequelize.DATE,
 			},
 			updatedAt: {
 				allowNull: false,
-				type: Sequelize.DATE
-			}
+				type: Sequelize.DATE,
+			},
 		});
 	},
 	down: (queryInterface, Sequelize) => {
-		return queryInterface.dropTable("friendships");
-	}
+		return queryInterface.dropTable('friendships');
+	},
 };

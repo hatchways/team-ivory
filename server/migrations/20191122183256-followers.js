@@ -1,17 +1,11 @@
 'use strict';
 
 module.exports = {
-  up: (queryInterface, Sequelize) => {
-    return queryInterface.renameTable(
-      'friendships',
-      'followers',
-    )
-  },
+	up: (queryInterface, Sequelize) => {
+		return queryInterface.renameTable('friendships', 'followers');
+	},
 
-  down: (queryInterface, Sequelize) => {
-    return queryInterface.renameTable(
-      'followers',
-      'friendships',
-    )
-  }
+	down: (queryInterface, Sequelize) => {
+		return queryInterface.renameTable('followers', 'friendships');
+	},
 };
