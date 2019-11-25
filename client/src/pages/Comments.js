@@ -56,9 +56,7 @@ const Comments = ({ recipe, comments, user }) => {
 					id: commentId,
 				}),
 			});
-			const newComments = commentsArray.filter(
-				comment => comment.id !== parseInt(commentId)
-			);
+			const newComments = commentsArray.filter(comment => comment.id !== parseInt(commentId));
 			setCommentsArray(newComments);
 		} catch (e) {
 			console.error(e);
@@ -79,9 +77,7 @@ const Comments = ({ recipe, comments, user }) => {
 				<React.Fragment>
 					<div>
 						{commentsArray.map(comment => (
-							<div
-								style={{ border: '1px solid black' }}
-								key={comment.created}>
+							<div style={{ border: '1px solid black' }} key={comment.created}>
 								{comment.id ? (
 									comment.userId === user.id ? (
 										<button
@@ -94,9 +90,7 @@ const Comments = ({ recipe, comments, user }) => {
 										''
 									)
 								) : (
-									<i style={{ float: 'right' }}>
-										recently added
-									</i>
+									<i style={{ float: 'right' }}>recently added</i>
 								)}
 								<div>
 									<NavLink to={`/user/${comment.username}`}>

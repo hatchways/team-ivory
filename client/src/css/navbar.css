@@ -1,22 +1,21 @@
-.navLink:hover{
-    color: #808080;
-    text-decoration: none;
+.navLink:hover {
+	color: #808080;
+	text-decoration: none;
 }
 
 .navLink {
-    color: #f0f0f0;
-    text-decoration: none;
-    height: 100%;
-    padding: 0.5rem;
+	color: #f0f0f0;
+	text-decoration: none;
+	height: 100%;
+	padding: 0.5rem;
 }
 
 .navSearch {
-    background: rgb(255, 198, 93);
-    color: #808080;
+	background: rgb(255, 198, 93);
+	color: #808080;
 }
 
-.navSearch:hover{
-    background: rgb(253, 165, 0);
-    color: #f0f0f0;
-
+.navSearch:hover {
+	background: rgb(253, 165, 0);
+	color: #f0f0f0;
 }

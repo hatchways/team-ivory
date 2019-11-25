@@ -61,9 +61,7 @@ class App extends Component {
 						<Route
 							exact
 							path="/"
-							render={props => (
-								<LandingPage {...props} user={user} />
-							)}
+							render={props => <LandingPage {...props} user={user} />}
 						/>
 						<Route exact path="/builder" component={BuilderPage} />
 						<Route exact path="/feed" component={Feed} />
@@ -76,15 +74,9 @@ class App extends Component {
 						<Route
 							exact
 							path="/user/:username/favorites"
-							render={props => (
-								<Favorites {...props} user={user} />
-							)}
+							render={props => <Favorites {...props} user={user} />}
 						/>
-						<Route
-							exact
-							path="/user/passwords/change"
-							component={ChangePassword}
-						/>
+						<Route exact path="/user/passwords/change" component={ChangePassword} />
 						<Route
 							exact
 							path="/login"
@@ -101,21 +93,14 @@ class App extends Component {
 							exact
 							path="/profile"
 							render={props => (
-								<Profile
-									{...props}
-									updateUser={() => this.updateUser()}
-								/>
+								<Profile {...props} updateUser={() => this.updateUser()} />
 							)}
 						/>
 						<Route
 							exact
 							path={`/user/:username`}
 							render={props => (
-								<User
-									{...props}
-									user={user}
-									logout={() => this.logout()}
-								/>
+								<User {...props} user={user} logout={() => this.logout()} />
 							)}
 						/>
 					</div>

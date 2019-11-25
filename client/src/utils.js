@@ -4,9 +4,7 @@ const sort = (recipes, sortBy, direction) => {
 	return recipes.sort((a, b) => {
 		if (sortBy === 'name') {
 			if (direction === 'desc') {
-				return a[sortBy].toLowerCase() < b[sortBy].toLowerCase()
-					? 1
-					: -1;
+				return a[sortBy].toLowerCase() < b[sortBy].toLowerCase() ? 1 : -1;
 			}
 			return a[sortBy].toLowerCase() > b[sortBy].toLowerCase() ? 1 : -1;
 		}

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import RecipeCard from '../base_components/RecipeCard';
 import { Link } from 'react-router-dom';
-import { Typography } from '@material-ui/core'
+import { Typography } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 
@@ -42,7 +42,7 @@ class User extends Component {
 		createdAt: '',
 		recipes: [],
 		favorites: false,
-		followed: false
+		followed: false,
 	};
 
 	// Set up initial user
@@ -53,7 +53,10 @@ class User extends Component {
 
 	// Ensure user update if :user in url is updated
 	componentDidUpdate(lastProps) {
-		if (lastProps.location.pathname !== this.props.location.pathname || lastProps.user != this.props.user) {
+		if (
+			lastProps.location.pathname !== this.props.location.pathname ||
+			lastProps.user != this.props.user
+		) {
 			this.requestUser();
 			this.getRecipes();
 		}
@@ -62,14 +65,16 @@ class User extends Component {
 	// Get the user from the url and request data from server
 	async requestUser() {
 		const urlUser = this.props.location.pathname.split('/').pop();
-		console.log(this.props.user)
-		let url = this.props.user ? '/user/' + urlUser+'?userId='+this.props.user.id : '/user/' + urlUser
-		console.log(url)
+		console.log(this.props.user);
+		let url = this.props.user
+			? '/user/' + urlUser + '?userId=' + this.props.user.id
+			: '/user/' + urlUser;
+		console.log(url);
 		const res = await fetch(url, {
 			method: 'get',
 			headers: {
-			  "Content-Type": "application/json"
-			}
+				'Content-Type': 'application/json',
+			},
 		});
 		console.log(res);
 		if (res.status >= 400 && res.status < 500) {
@@ -105,15 +110,15 @@ class User extends Component {
 		fetch('/api/followers', {
 			method: 'post',
 			headers: {
-			  "Content-Type": "application/json"
+				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({
-			  followId: this.state.id
-			})
-		}).then((res)=>{
-			this.setState({followed:true})
-		})
-	}
+				followId: this.state.id,
+			}),
+		}).then(res => {
+			this.setState({ followed: true });
+		});
+	};
 
 	render() {
 		const { classes } = this.props;
@@ -127,13 +132,12 @@ class User extends Component {
 		}
 		console.log(ownProfile);
 
-		let followSection = ''
-		if(!ownProfile){
-			if(this.state.followed){
-				followSection = <Typography>Folllowed</Typography>
-			}
-			else{
-				followSection = <Button onClick={this.followUser}>Follow</Button>
+		let followSection = '';
+		if (!ownProfile) {
+			if (this.state.followed) {
+				followSection = <Typography>Folllowed</Typography>;
+			} else {
+				followSection = <Button onClick={this.followUser}>Follow</Button>;
 			}
 		}
 		return (
@@ -146,12 +150,7 @@ class User extends Component {
 						<p>{`Email: ${email}`}</p>
 					</div>
 				</div>
-				{ownProfile ? (
-					<UserLinks
-						classes={classes}
-						signout={() => this.signout()}
-					/>
-				) : null}
+				{ownProfile ? <UserLinks classes={classes} signout={() => this.signout()} /> : null}
 				{followSection}
 				<div>
 					<h2>{`${firstName}'s recipes:`}</h2>

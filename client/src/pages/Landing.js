@@ -12,8 +12,7 @@ const landinPageStyle = theme => ({
 
 class LandingPage extends Component {
 	state = {
-		testUser:
-			'Client did not fetch test user from database (check your code)',
+		testUser: 'Client did not fetch test user from database (check your code)',
 		welcomeMessage: 'Step 1: Run the server and refresh (not running)',
 		step: 0,
 		recipes: [],
@@ -67,9 +66,7 @@ class LandingPage extends Component {
 			sortBy = e.target.value;
 			direction = 'desc';
 		}
-		const recipes = this.state.searched
-			? this.state.searchedRecipes
-			: this.state.recipes;
+		const recipes = this.state.searched ? this.state.searchedRecipes : this.state.recipes;
 
 		const sortedRecipes = utils.sort(recipes, sortBy, direction);
 		this.state.searched
@@ -89,14 +86,7 @@ class LandingPage extends Component {
 
 	render() {
 		const { classes, user } = this.props;
-		const {
-			recipes,
-			searched,
-			searchedRecipes,
-			sorted,
-			sortedBy,
-			sortDirection,
-		} = this.state;
+		const { recipes, searched, searchedRecipes, sorted, sortedBy, sortDirection } = this.state;
 		let asc = 'Ascending';
 		let desc = 'Descending';
 		if (sortedBy === 'id') {
@@ -113,9 +103,7 @@ class LandingPage extends Component {
 		}
 		return (
 			<div className={classes.landingContainer}>
-				<input
-					placeholder="Search by name"
-					onChange={this.handleSearch}></input>{' '}
+				<input placeholder="Search by name" onChange={this.handleSearch}></input>{' '}
 				<select value={sortedBy} onChange={this.handleSort}>
 					<option value="" selected disabled>
 						Sort By
@@ -124,10 +112,7 @@ class LandingPage extends Component {
 					<option value="id">Date Created</option>
 					<option value="likes">Popularity</option>
 				</select>{' '}
-				<select
-					value={sortDirection}
-					disabled={!sorted}
-					onChange={this.handleSort}>
+				<select value={sortDirection} disabled={!sorted} onChange={this.handleSort}>
 					<option value="" selected disabled>
 						Direction
 					</option>
@@ -136,10 +121,7 @@ class LandingPage extends Component {
 						{desc}
 					</option>
 				</select>
-				<Feed
-					recipes={searched ? searchedRecipes : recipes}
-					user={user}
-				/>
+				<Feed recipes={searched ? searchedRecipes : recipes} user={user} />
 			</div>
 		);
 	}

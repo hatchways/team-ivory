@@ -1,36 +1,36 @@
 .overview {
-    display: grid;
-    grid-template-areas: 
-    'preview name'
-    'preview image'
-    'preview tags';
-    grid-gap: 10px;
+	display: grid;
+	grid-template-areas:
+		'preview name'
+		'preview image'
+		'preview tags';
+	grid-gap: 10px;
 }
 
 #preview {
-    grid-area: preview;
+	grid-area: preview;
 }
 
 #name {
-    grid-area: name;
+	grid-area: name;
 }
 
 #tags {
-    grid-area: tags;
+	grid-area: tags;
 }
 
 #image {
-    grid-area: image;
+	grid-area: image;
 }
 @media only screen and (max-device-width: 768px) {
-    .overview {
-        grid-template-areas: 
-        'name'
-        'preview'
-        'image'
-        'tags';
-    }
-    .adderContainer {
-        display: inline!important;
-    }
+	.overview {
+		grid-template-areas:
+			'name'
+			'preview'
+			'image'
+			'tags';
+	}
+	.adderContainer {
+		display: inline !important;
+	}
 }

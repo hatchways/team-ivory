@@ -78,20 +78,17 @@ export default function RecipeCard(props) {
 	// Updates the favorite status and handles it client side with state
 	const handleFavorite = async () => {
 		try {
-			const updateFavorite = await fetch(
-				`/user/${props.user.user}/favorites`,
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						userId: props.user.id,
-						recipeId: props.recipe.id,
-						favorited: !favorited,
-					}),
-				}
-			);
+			const updateFavorite = await fetch(`/user/${props.user.user}/favorites`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					userId: props.user.id,
+					recipeId: props.recipe.id,
+					favorited: !favorited,
+				}),
+			});
 			if (updateFavorite.status === 200) {
 				if (favorited) {
 					setLikes(likes - 1);
@@ -133,9 +130,7 @@ export default function RecipeCard(props) {
 			<CardContent>
 				<Typography variant="body2" color="textSecondary" component="p">
 					by{' '}
-					<NavLink to={`/user/${props.recipe.username}`}>
-						{props.recipe.username}
-					</NavLink>
+					<NavLink to={`/user/${props.recipe.username}`}>{props.recipe.username}</NavLink>
 				</Typography>
 			</CardContent>
 			{page === 'favorites' ? (
@@ -150,14 +145,8 @@ export default function RecipeCard(props) {
 			{page === 'feed' ? (
 				<React.Fragment>
 					<CardActions disableSpacing style={{ flexWrap: 'wrap' }}>
-						<IconButton
-							onClick={handleFavorite}
-							aria-label="add to favorites">
-							{favorited ? (
-								<FavoriteIcon color="error" />
-							) : (
-								<FavoriteIcon />
-							)}
+						<IconButton onClick={handleFavorite} aria-label="add to favorites">
+							{favorited ? <FavoriteIcon color="error" /> : <FavoriteIcon />}
 						</IconButton>
 						{likes}&nbsp;
 						{props.recipe.tags.map((tag, index) => (
@@ -179,16 +168,13 @@ export default function RecipeCard(props) {
 					<Collapse in={expanded} timeout="auto" unmountOnExit>
 						<CardContent>
 							<Typography paragraph>Ingredients:</Typography>
-							{props.recipe.ingredients.map(
-								(ingredient, index) => (
-									<Typography paragraph key={index}>
-										{ingredient.quantity}{' '}
-										{ingredient.unit.label}
-										{ingredient.quantity > 1 && 's'} of{' '}
-										{ingredient.ingredient.label}
-									</Typography>
-								)
-							)}
+							{props.recipe.ingredients.map((ingredient, index) => (
+								<Typography paragraph key={index}>
+									{ingredient.quantity} {ingredient.unit.label}
+									{ingredient.quantity > 1 && 's'} of{' '}
+									{ingredient.ingredient.label}
+								</Typography>
+							))}
 							<Typography paragraph>Steps:</Typography>
 							{props.recipe.steps.map((step, index) => (
 								<Typography paragraph key={index}>

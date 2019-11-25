@@ -48,9 +48,7 @@ const Favorites = ({ user }) => {
 				body: JSON.stringify({ recipeId }),
 			});
 			if (res.status === 200) {
-				const newFavorites = favorites.filter(
-					favorite => favorite.id !== recipeId
-				);
+				const newFavorites = favorites.filter(favorite => favorite.id !== recipeId);
 				setFavorites(newFavorites);
 			}
 		} catch (e) {

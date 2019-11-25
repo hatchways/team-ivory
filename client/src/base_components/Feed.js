@@ -20,15 +20,11 @@ export default function Feed(props) {
 						key={recipe.id}
 						recipe={recipe}
 						user={props.user}
-						page={"feed"}
+						page={'feed'}
 						className={classes.recipeCard}
 					/>
 			  ))
 			: '';
 
-	return (
-		<div>
-			{recipeCards}
-		</div>
-	);
+	return <div>{recipeCards}</div>;
 }

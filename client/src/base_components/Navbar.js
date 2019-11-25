@@ -1,13 +1,5 @@
 import React, { Component } from 'react';
-import {
-	Nav,
-	Navbar,
-	Form,
-	FormControl,
-	Button,
-	Dropdown,
-	DropdownButton,
-} from 'react-bootstrap';
+import { Nav, Navbar, Form, FormControl, Button, Dropdown, DropdownButton } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import '../css/navbar.css';
 
@@ -43,11 +35,7 @@ export default class AppNavbar extends Component {
 						)}
 					</Nav>
 					<Form inline>
-						<FormControl
-							type="text"
-							placeholder="Search"
-							className="mr-sm-2"
-						/>
+						<FormControl type="text" placeholder="Search" className="mr-sm-2" />
 						<Button className="navSearch" variant="outline-info">
 							Search
 						</Button>
@@ -63,26 +51,17 @@ class SignedIn extends Component {
 		return (
 			<React.Fragment>
 				<Nav>
-					<Link
-						className="navLink"
-						style={this.navlinkStyle}
-						to="/builder">
+					<Link className="navLink" style={this.navlinkStyle} to="/builder">
 						Builder
 					</Link>
 				</Nav>
 				<Nav>
-					<Link
-						className="navLink"
-						style={this.navlinkStyle}
-						to="/notifications">
+					<Link className="navLink" style={this.navlinkStyle} to="/notifications">
 						Notifications
 					</Link>
 				</Nav>
 				<Nav>
-					<Link
-						className="navLink"
-						style={this.navlinkStyle}
-						to="/cart">
+					<Link className="navLink" style={this.navlinkStyle} to="/cart">
 						Cart
 					</Link>
 				</Nav>
@@ -92,7 +71,7 @@ class SignedIn extends Component {
 						size="sm"
 						variant="Success"
 						className="navbar-custom"
-						style={{ 'alignSelf': 'center', color: 'white' }}
+						style={{ alignSelf: 'center', color: 'white' }}
 						title={this.props.name}>
 						<Dropdown.Item href={`/user/${this.props.username}`}>
 							{this.props.username}
@@ -100,9 +79,7 @@ class SignedIn extends Component {
 						<Dropdown.Item href={`/user/${this.props.username}/favorites`}>
 							Favorites
 						</Dropdown.Item>
-						<Dropdown.Item href={'/profile'}>
-							Edit Profile
-						</Dropdown.Item>
+						<Dropdown.Item href={'/profile'}>Edit Profile</Dropdown.Item>
 						<Dropdown.Item as="button" onClick={this.props.logout}>
 							Sign out
 						</Dropdown.Item>

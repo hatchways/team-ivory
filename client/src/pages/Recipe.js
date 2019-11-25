@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Comments from './Comments';
 
-const Recipe = (props) => {
+const Recipe = props => {
 	const [recipeArray, setRecipeArray] = useState(null);
-	const [comments, setComments] = useState([])
+	const [comments, setComments] = useState([]);
 
 	useEffect(() => {
 		fetchRecipe();
@@ -19,7 +19,7 @@ const Recipe = (props) => {
 				throw new Error(response.statusText);
 			const { recipe, comments } = await response.json();
 			setRecipeArray(recipe);
-			setComments(comments)
+			setComments(comments);
 		} catch (e) {
 			console.error(e);
 		}
