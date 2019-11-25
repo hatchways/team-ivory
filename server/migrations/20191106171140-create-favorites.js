@@ -1,35 +1,35 @@
-"use strict";
+'use strict';
 module.exports = {
 	up: (queryInterface, Sequelize) => {
-		return queryInterface.createTable("favorites", {
+		return queryInterface.createTable('favorites', {
 			id: {
 				allowNull: false,
 				autoIncrement: true,
 				primaryKey: true,
-				type: Sequelize.INTEGER
+				type: Sequelize.INTEGER,
 			},
 			userId: {
 				type: Sequelize.INTEGER,
-				unique: "compositeIndex"
+				unique: 'compositeIndex',
 			},
 			recipeId: {
 				type: Sequelize.INTEGER,
-				unique: "compositeIndex"
+				unique: 'compositeIndex',
 			},
 			favorited: {
-				type: Sequelize.INTEGER
+				type: Sequelize.INTEGER,
 			},
 			createdAt: {
 				allowNull: false,
-				type: Sequelize.DATE
+				type: Sequelize.DATE,
 			},
 			updatedAt: {
 				allowNull: false,
-				type: Sequelize.DATE
-			}
+				type: Sequelize.DATE,
+			},
 		});
 	},
 	down: (queryInterface, Sequelize) => {
-		return queryInterface.dropTable("favorites");
-	}
+		return queryInterface.dropTable('favorites');
+	},
 };

@@ -1,18 +1,15 @@
 'use strict';
 
 module.exports = {
-  up: (queryInterface, Sequelize) => {
-    return queryInterface.addColumn(
-      'ingredients',
-      'unit',
-      Sequelize.STRING
-    )
-  },
+	up: (queryInterface, Sequelize) => {
+		return queryInterface.addColumn(
+			'ingredients',
+			'unit',
+			Sequelize.STRING
+		);
+	},
 
-  down: (queryInterface, Sequelize) => {
-    return queryInterface.removeColumn(
-      'ingredients',
-      'unit'
-    )
-  }
+	down: (queryInterface, Sequelize) => {
+		return queryInterface.removeColumn('ingredients', 'unit');
+	},
 };

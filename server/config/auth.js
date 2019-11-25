@@ -11,17 +11,26 @@ module.exports = {
 				console.info('Cookie verified.');
 				// Get current user and attach to request
 				const temp = await jwt.decode(cookie);
-				const user = (await models.users.findOne({ where: { username: temp.user } }))
-					.dataValues;
+				const user = (
+					await models.users.findOne({
+						where: { username: temp.user },
+					})
+				).dataValues;
 				req.user = user;
 				return next();
 			}
 			// } else return res.redirect('/login');
-			return res.status(400).send({ message: 'Invalid token. Please try signing in again' });
+			return res
+				.status(400)
+				.send({
+					message: 'Invalid token. Please try signing in again',
+				});
 		}
 		console.log('Authentication failed.');
 		// return res.redirect('/login');
-		return res.status(400).send({ message: 'Please ensure you are signed in.' });
+		return res
+			.status(400)
+			.send({ message: 'Please ensure you are signed in.' });
 
 		// Passport method:
 		//

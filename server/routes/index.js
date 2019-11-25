@@ -11,7 +11,10 @@ router.get('/welcome', ensureAuthenticated, function(req, res, next) {
 	models.users.findAll({}).then(function(users) {
 		let testUser = users[0].dataValues;
 		console.log(testUser);
-		res.status(200).send({ welcomeMessage: 'Step 1 (completed)', testUser });
+		res.status(200).send({
+			welcomeMessage: 'Step 1 (completed)',
+			testUser,
+		});
 	});
 });
 
@@ -45,21 +48,34 @@ router.post('/login', (req, res, next) => {
 			});
 		else if (!user)
 			res.status(400).send({
-				message: 'Please ensure that the username and password are correct.',
+				message:
+					'Please ensure that the username and password are correct.',
 			});
 		else {
 			const token = await jwt.generateToken(user);
 			res.cookie('jwt', token);
-			res.status(200).send({ message: 'Login ok.', username: user.username });
+			res.status(200).send({
+				message: 'Login ok.',
+				username: user.username,
+			});
 		}
 	}
 });
 
 // Signup
 router.post('/signup', (req, res, next) => {
-	const { username, password, passwordConfirm, first, last, email } = req.body;
+	const {
+		username,
+		password,
+		passwordConfirm,
+		first,
+		last,
+		email,
+	} = req.body;
 	// Ensure no fields are empty
-	if (!checkInput([username, password, passwordConfirm, first, last, email])) {
+	if (
+		!checkInput([username, password, passwordConfirm, first, last, email])
+	) {
 		console.info('Signup attempt with empty fields.');
 		return res.status(400).send({ message: 'Cannot have empty fields.' });
 	}
@@ -70,26 +86,28 @@ router.post('/signup', (req, res, next) => {
 	}
 
 	// If username/email do not exist in db, create new user
-	models.users.findOne({ where: { [Op.or]: [{ username }, { email }] } }).then(async user => {
-		console.info(`User query complete.`);
-		if (user) {
-			// Return bad request if user exists
-			console.info('Bad signup attempt: User exists.');
-			res.status(400).send({ message: 'User already exists.' });
-		} else {
-			// Otherwise hash password and save user to db
-			console.info('Creating new user.');
-			const hash = await bcrypt.hash(password, 10);
-			models.users.create({
-				username,
-				email,
-				firstName: first,
-				lastName: last,
-				password: hash,
-			});
-			res.status(200).send({ message: 'Signup successfull.' });
-		}
-	});
+	models.users
+		.findOne({ where: { [Op.or]: [{ username }, { email }] } })
+		.then(async user => {
+			console.info(`User query complete.`);
+			if (user) {
+				// Return bad request if user exists
+				console.info('Bad signup attempt: User exists.');
+				res.status(400).send({ message: 'User already exists.' });
+			} else {
+				// Otherwise hash password and save user to db
+				console.info('Creating new user.');
+				const hash = await bcrypt.hash(password, 10);
+				models.users.create({
+					username,
+					email,
+					firstName: first,
+					lastName: last,
+					password: hash,
+				});
+				res.status(200).send({ message: 'Signup successfull.' });
+			}
+		});
 
 	function checkInput(inputs) {
 		return inputs.every(input => input != '' && input != null);
