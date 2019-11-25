@@ -99,7 +99,7 @@ const usersFavorites = async userId => {
 				imageUrl: recipe.recipe.image.replace('public', ''),
 				steps: recipe.recipe.steps,
 				tags: recipe.recipe.tags,
-				created: recipe.recipe.createdAt
+				created: recipe.recipe.createdAt,
 			};
 			// obj.username = username;
 			// return obj;
@@ -123,10 +123,21 @@ const usersFollowing = async userId => {
 	return followers;
 };
 
+const getRecipe = recipeId => {
+	const query = models.recipes.findOne({
+		// include: {
+		// 	model: models.ingredients,
+		// },
+		where: { id: recipeId },
+	});
+	return query;
+};
+
 module.exports = {
 	countFavorites,
 	allRecipesWithFavorites,
 	removeFavorite,
 	usersFavorites,
 	usersFollowing,
+	getRecipe
 };
