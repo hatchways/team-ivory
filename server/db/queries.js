@@ -10,11 +10,15 @@ const countFavorites = recipe => {
 		});
 };
 
-const allRecipesWithFavorites = async userId => {
-	models.recipes.hasMany(models.favorites, {
-		foreignKey: 'recipeId',
-	});
+const findRecipeUser = async userId => {
+	const query = await models.users.findOne({ where: { id: userId } });
+	if (query) {
+		return query.dataValues.username;
+	}
+	return 'no user found';
+};
 
+const allRecipesWithFavorites = async userId => {
 	const allRecipes = await models.recipes.findAll({
 		include: [
 			{ model: models.ingredients },
@@ -27,10 +31,12 @@ const allRecipesWithFavorites = async userId => {
 
 	const mappedRecipes = await Promise.all(
 		allRecipes.map(async recipe => {
+			const username = await findRecipeUser(recipe.userId);
 			const likes = await countFavorites(recipe);
 			return {
 				id: recipe.id,
 				user: recipe.userId,
+				username: username,
 				name: recipe.name,
 				imageUrl: recipe.image.replace('public', ''),
 				steps: recipe.steps,
@@ -72,24 +78,35 @@ const removeFavorite = async (userId, recipeId) => {
 	return result;
 };
 
-//WIP
 const usersFavorites = async userId => {
-	// Create association
-	models.favorites.belongsTo(models.recipes, { foreign_key: 'recipeId' });
-
-	// Find all favorites by current user and joins the recipe to each favorite
 	const recipes = await models.favorites.findAll({
 		include: {
 			model: models.recipes,
 		},
-		where: { userId: req.user.id, favorited: 1 },
+		where: { userId: userId, favorited: 1 },
 	});
-	// console.log(recipes.)
-	// .then(function(recipes) {
-	// 	console.log(recipes.length)
-	// 	const favorites = recipes.map(recipe => recipe.dataValues);
-	// 	res.status(200).send({ favorites });
-	// });
+
+	const favorites = await Promise.all(
+		recipes.map(async recipe => {
+			const username = await findRecipeUser(recipe.recipe.userId);
+			const likes = await countFavorites(recipe);
+			return {
+				id: recipe.recipeId,
+				name: recipe.recipe.name,
+				userId: recipe.recipe.userId,
+				username: username,
+				favorited: recipe.favorited,
+				imageUrl: recipe.recipe.image.replace('public', ''),
+				steps: recipe.recipe.steps,
+				tags: recipe.recipe.tags,
+				created: recipe.recipe.createdAt
+			};
+			// obj.username = username;
+			// return obj;
+		})
+	);
+	// console.log(favorites[0])
+	return favorites;
 };
 
 const usersFollowing = async userId => {
@@ -110,5 +127,6 @@ module.exports = {
 	countFavorites,
 	allRecipesWithFavorites,
 	removeFavorite,
+	usersFavorites,
 	usersFollowing,
 };

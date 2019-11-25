@@ -6,7 +6,9 @@ module.exports = (sequelize, DataTypes) => {
     favorited: DataTypes.INTEGER
   }, {});
   favorites.associate = function(models) {
-    // associations can be defined here
+    favorites.belongsTo(models.recipes, {
+      foreignKey: 'recipeId',
+    });
   };
   return favorites;
 };

@@ -20,6 +20,7 @@ export default function Feed(props) {
 						key={recipe.id}
 						recipe={recipe}
 						user={props.user}
+						page={"feed"}
 						className={classes.recipeCard}
 					/>
 			  ))
