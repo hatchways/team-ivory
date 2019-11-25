@@ -56,7 +56,7 @@ class User extends Component {
 
 	// Ensure user update if :user in url is updated
 	componentDidUpdate(lastProps) {
-		if (lastProps.location.pathname !== this.props.location.pathname) {
+		if (lastProps.location.pathname !== this.props.location.pathname || lastProps.user != this.props.user) {
 			this.requestUser();
 			this.getRecipes();
 		}
@@ -65,14 +65,14 @@ class User extends Component {
 	// Get the user from the url and request data from server
 	async requestUser() {
 		const urlUser = this.props.location.pathname.split('/').pop();
-		const res = await fetch('/user/' + urlUser, {
-			method: 'post',
+		console.log(this.props.user)
+		let url = this.props.user ? '/user/' + urlUser+'?userId='+this.props.user.id : '/user/' + urlUser
+		console.log(url)
+		const res = await fetch(url, {
+			method: 'get',
 			headers: {
 			  "Content-Type": "application/json"
-			},
-			body: JSON.stringify({
-			  userId: this.props.user
-			})
+			}
 		});
 		console.log(res);
 		if (res.status >= 400 && res.status < 500) {

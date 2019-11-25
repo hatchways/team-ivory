@@ -141,16 +141,57 @@ router.get('/recipes', ensureAuthenticated, function(req, res, next) {
 					},
 				});
 			});
-	} else {
+	} else if(req.user) {
 		models.recipes.hasMany(models.favorites, { foreignKey: 'recipeId' });
-
+		models.followers.findAll({where:{followerId: req.user.id}}).then((followed)=>{
+			models.recipes
+			.findAll({
+				include: [
+					{ model: models.ingredients },
+					{
+						model: models.favorites,
+						where: { userId: followed.map((follower)=>{return follower.userId}) }
+					},
+				],
+				order: [['id', 'ASC']],
+			})
+			.then(recipes => {
+				res.status(200).send(
+					recipes.map(recipe => {
+						// console.log(recipe.ingredients)
+						return {
+							id: recipe.id,
+							user: recipe.userId,
+							name: recipe.name,
+							imageUrl: recipe.image.replace('public', ''),
+							steps: recipe.steps,
+							tags: recipe.tags,
+							//checks if there is a favorites relationship and then checks if the relationship belongs to current user
+							favorited: recipe.dataValues.favorites[0]
+								? recipe.dataValues.favorites.some(
+										favorite => favorite.dataValues.userId === req.user.id && favorite.dataValues.favorited === 1
+								  )
+									? 1
+									: 0
+								: 0,
+							created: recipe.createdAt,
+							ingredients: recipe.ingredients.map(ingredient => {
+								return { ingredient: { label: ingredient.name }, quantity: ingredient.quantity, unit: { label: ingredient.unit } };
+							}),
+						};
+					})
+				);
+			});
+		})
+		
+	}
+	else {
 		models.recipes
 			.findAll({
 				include: [
 					{ model: models.ingredients },
 					{
 						model: models.favorites,
-						// , where: { userId: req.user.id }
 					},
 				],
 				order: [['id', 'ASC']],

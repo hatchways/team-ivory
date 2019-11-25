@@ -29,13 +29,11 @@ router.get('/profile', ensureAuthenticated, (req, res, next) => {
 
 router.get('/:username', (req, res, next) => {
 	console.log('Requesting user profile');
-	console.log(req.params);
+	console.log(req.params);	 	
 	models.users.findOne({ where: { username: req.params.username } }).then(user => {
 		if (user) {
-			console.log(req.body.userId)
-			if(req.user){
-				console.log('requser')
-				models.followers.findOne({where: {userId:user.id, followerId:req.user.id}}).then((follower)=>{
+			if(req.query.userId){
+				return models.followers.findOne({where: {userId:user.id, followerId:req.query.userId}}).then((follower)=>{
 					const { id, username, firstName, lastName, createdAt, email } = user.dataValues;
 					if(follower){
 						console.log('follower')
