@@ -109,9 +109,11 @@ export default function RecipeCard(props) {
 		<Card className={classes.card + ' ' + props.className} id={props.id}>
 			<CardHeader
 				avatar={
-					<Avatar aria-label="recipe" className={classes.avatar}>
-						{props.recipe.name.charAt(0)}
-					</Avatar>
+					<NavLink to={`/recipe/${props.recipe.id}`}>
+						<Avatar aria-label="recipe" className={classes.avatar}>
+							{props.recipe.name.charAt(0)}
+						</Avatar>
+					</NavLink>
 				}
 				title={props.recipe.name}
 				subheader={props.recipe.created}
@@ -121,11 +123,13 @@ export default function RecipeCard(props) {
 					</IconButton>
 				}
 			/>
-			<CardMedia
-				className={classes.media}
-				image={props.recipe.imageUrl}
-				title={props.recipe.name}
-			/>
+			<NavLink to={`/recipe/${props.recipe.id}`}>
+				<CardMedia
+					className={classes.media}
+					image={props.recipe.imageUrl}
+					title={props.recipe.name}
+				/>
+			</NavLink>
 			<CardContent>
 				<Typography variant="body2" color="textSecondary" component="p">
 					by{' '}
