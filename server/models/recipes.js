@@ -8,7 +8,12 @@ module.exports = (sequelize, DataTypes) => {
     tags: DataTypes.ARRAY(DataTypes.STRING)
   }, {});
   recipes.associate = function(models) {
-    recipes.hasMany(models.ingredients)
+    recipes.hasMany(models.favorites, {
+      foreignKey: 'recipeId',
+    });
+    recipes.hasMany(models.ingredients, {
+      foreignKey: 'recipeId',
+    });
   };
   return recipes;
 };

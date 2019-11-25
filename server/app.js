@@ -5,10 +5,11 @@ import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import passport from 'passport';
 
-import indexRouter from "./routes/index";
-import pingRouter from "./routes/ping";
-import apiRouter from "./routes/api";
+import indexRouter from './routes/index';
+import pingRouter from './routes/ping';
+import apiRouter from './routes/api';
 import userRouter from './routes/user';
+import recipeRouter from './routes/recipe';
 
 var app = express();
 
@@ -27,7 +28,8 @@ app.use(passport.initialize());
 app.use('/', indexRouter);
 app.use('/ping', pingRouter);
 app.use('/user', userRouter);
-app.use("/api", apiRouter);
+app.use('/api', apiRouter);
+app.use('/recipe', recipeRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

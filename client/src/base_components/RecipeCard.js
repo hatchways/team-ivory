@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
+import { NavLink } from 'react-router-dom';
 import clsx from 'clsx';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
@@ -12,6 +13,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import { red } from '@material-ui/core/colors';
 import FavoriteIcon from '@material-ui/icons/Favorite';
+import DeleteIcon from '@material-ui/icons/Delete';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
 
@@ -41,13 +43,15 @@ const useStyles = makeStyles(theme => ({
 export default function RecipeCard(props) {
 	const classes = useStyles();
 	const [expanded, setExpanded] = useState(false);
-  const [favorited, setFavorited] = useState(0);
-  const [likes, setLikes] = useState(0)
+	const [page, setPage] = useState('');
+	const [favorited, setFavorited] = useState(0);
+	const [likes, setLikes] = useState(0);
 
 	useEffect(() => {
-    setFavorited(props.recipe.favorited);
-    setLikes(props.recipe.likes)
-  }, [props]);
+		setPage(props.page);
+		setFavorited(props.recipe.favorited);
+		setLikes(props.recipe.likes);
+	}, [props]);
 
 	const handleExpandClick = () => {
 		setExpanded(!expanded);
@@ -71,28 +75,34 @@ export default function RecipeCard(props) {
 			});
 	};
 
+	// Updates the favorite status and handles it client side with state
 	const handleFavorite = async () => {
-		const updateFavorite = await fetch(
-			`/user/${props.user.user}/favorites`,
-			{
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					userId: props.user.id,
-					recipeId: props.recipe.id,
-					favorited: favorited,
-				}),
+		try {
+			const updateFavorite = await fetch(
+				`/user/${props.user.user}/favorites`,
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						userId: props.user.id,
+						recipeId: props.recipe.id,
+						favorited: !favorited,
+					}),
+				}
+			);
+			if (updateFavorite.status === 200) {
+				if (favorited) {
+					setLikes(likes - 1);
+				} else {
+					setLikes(likes + 1);
+				}
+				setFavorited(!favorited);
 			}
-		);
-    const response = await updateFavorite.json();
-    if (response.favorited === 0) {
-      setLikes(likes - 1);
-    } else {
-      setLikes(likes + 1);
-    }
-		setFavorited(response.favorited);
+		} catch (e) {
+			console.error(e);
+		}
 	};
 
 	return (
@@ -117,55 +127,76 @@ export default function RecipeCard(props) {
 				title={props.recipe.name}
 			/>
 			<CardContent>
-        <Typography variant="body2" color="textSecondary" component="p">
-          This impressive paella is a perfect party dish and a fun meal to cook together with your
-          guests. Add 1 cup of frozen peas along with the mussels, if you like.
-        </Typography>
-      </CardContent>
-			<CardActions disableSpacing style={{ flexWrap: 'wrap' }}>
-				<IconButton
-					onClick={handleFavorite}
-					aria-label="add to favorites">
-					{favorited ? (
-						<FavoriteIcon color="error" />
-					) : (
-						<FavoriteIcon />
-					)}
-				</IconButton>
-				{likes}&nbsp;
-				{props.recipe.tags.map((tag, index) => (
-					<a href="/#" key={index}>
-						#{tag}
-					</a>
-				))}
-				<IconButton
-					className={clsx(classes.expand, {
-						[classes.expandOpen]: expanded,
-					})}
-					onClick={handleExpandClick}
-					aria-expanded={expanded}
-					aria-label="show more">
-					<ExpandMoreIcon />
-				</IconButton>
-			</CardActions>
-			<Collapse in={expanded} timeout="auto" unmountOnExit>
-				<CardContent>
-					<Typography paragraph>Ingredients:</Typography>
-					{props.recipe.ingredients.map((ingredient, index) => (
-						<Typography paragraph key={index}>
-							{ingredient.quantity} {ingredient.unit.label}
-							{ingredient.quantity > 1 && 's'} of{' '}
-							{ingredient.ingredient.label}
-						</Typography>
-					))}
-					<Typography paragraph>Steps:</Typography>
-					{props.recipe.steps.map((step, index) => (
-						<Typography paragraph key={index}>
-							{index + 1}. {step}
-						</Typography>
-					))}
-				</CardContent>
-			</Collapse>
+				<Typography variant="body2" color="textSecondary" component="p">
+					by{' '}
+					<NavLink to={`/user/${props.recipe.username}`}>
+						{props.recipe.username}
+					</NavLink>
+				</Typography>
+			</CardContent>
+			{page === 'favorites' ? (
+				<CardActions disableSpacing style={{ flexWrap: 'wrap' }}>
+					<IconButton onClick={() => props.remove(props.recipe.id)}>
+						<DeleteIcon></DeleteIcon>
+					</IconButton>
+				</CardActions>
+			) : (
+				''
+			)}
+			{page === 'feed' ? (
+				<React.Fragment>
+					<CardActions disableSpacing style={{ flexWrap: 'wrap' }}>
+						<IconButton
+							onClick={handleFavorite}
+							aria-label="add to favorites">
+							{favorited ? (
+								<FavoriteIcon color="error" />
+							) : (
+								<FavoriteIcon />
+							)}
+						</IconButton>
+						{likes}&nbsp;
+						{props.recipe.tags.map((tag, index) => (
+							<a href="/#" key={index}>
+								#{tag}
+							</a>
+						))}
+						<IconButton
+							className={clsx(classes.expand, {
+								[classes.expandOpen]: expanded,
+							})}
+							onClick={handleExpandClick}
+							aria-expanded={expanded}
+							aria-label="show more">
+							<ExpandMoreIcon />
+						</IconButton>
+					</CardActions>
+
+					<Collapse in={expanded} timeout="auto" unmountOnExit>
+						<CardContent>
+							<Typography paragraph>Ingredients:</Typography>
+							{props.recipe.ingredients.map(
+								(ingredient, index) => (
+									<Typography paragraph key={index}>
+										{ingredient.quantity}{' '}
+										{ingredient.unit.label}
+										{ingredient.quantity > 1 && 's'} of{' '}
+										{ingredient.ingredient.label}
+									</Typography>
+								)
+							)}
+							<Typography paragraph>Steps:</Typography>
+							{props.recipe.steps.map((step, index) => (
+								<Typography paragraph key={index}>
+									{index + 1}. {step}
+								</Typography>
+							))}
+						</CardContent>
+					</Collapse>
+				</React.Fragment>
+			) : (
+				''
+			)}
 		</Card>
 	);
 }

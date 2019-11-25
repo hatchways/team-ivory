@@ -56,34 +56,18 @@ router.get('/:username', (req, res, next) => {
 	});
 });
 
-router.get('/:username/favorites', ensureAuthenticated, (req, res) => {
+router.get('/:username/favorites', ensureAuthenticated, async (req, res) => {
 	console.log("User's favorites");
-	console.log('user id', req.user.id);
-
-	// Create association
-	models.favorites.belongsTo(models.recipes, { foreign_key: 'recipeId' });
-
-	// Find all favorites by current user and joins the recipe to each favorite
-	models.favorites
-		.findAll({
-			include: {
-				model: models.recipes,
-			},
-			where: { userId: req.user.id, favorited: 1 },
-		})
-		.then(function(recipes) {
-			console.log(recipes.length)
-			const favorites = recipes.map(recipe => recipe.dataValues);
-			res.status(200).send({ favorites });
-		});
+	const favorites = await queries.usersFavorites(req.user.id);
+	console.log(favorites)
+	res.json({ favorites });
 });
 
 router.post('/:username/favorites', ensureAuthenticated, async (req, res) => {
-	const updateTo = req.body.favorited ? 0 : 1;
+	const updateTo = req.body.favorited ? 1 : 0;
 	const query = await models.favorites.findAll({
 		where: { userId: req.body.userId, recipeId: req.body.recipeId },
 	});
-
 	if (!query[0]) {
 		console.log('time to insert');
 		const result = await models.favorites.create({
@@ -91,7 +75,7 @@ router.post('/:username/favorites', ensureAuthenticated, async (req, res) => {
 			recipeId: req.body.recipeId,
 			favorited: 1,
 		});
-		res.json({ favorited: 1 });
+		res.json({ msg: 'inserted to favorites' });
 	} else {
 		console.log('time to update');
 		const result = await models.favorites.update(
@@ -100,7 +84,7 @@ router.post('/:username/favorites', ensureAuthenticated, async (req, res) => {
 			},
 			{ where: { id: query[0].dataValues.id } }
 		);
-		res.json({ favorited: updateTo });
+		res.json({ msg: 'updated favorite' });
 	}
 });
 

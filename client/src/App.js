@@ -17,6 +17,7 @@ import Cart from './pages/Cart';
 import AppNavbar from './base_components/Navbar';
 import ChangePassword from './pages/ChangePassword';
 import Favorites from './pages/Favorites';
+import Recipe from './pages/Recipe';
 
 import './App.css';
 
@@ -67,6 +68,7 @@ class App extends Component {
 						<Route exact path="/builder" component={BuilderPage} />
 						<Route exact path="/feed" component={Feed} />
 						<Route exact path="/cart" component={Cart} />
+						<Route exact path="/recipe/:recipeId" component={Recipe} />
 						<Route
 							exact
 							path="/user/:username/favorites"

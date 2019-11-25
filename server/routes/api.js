@@ -82,7 +82,7 @@ router.get('/recipes', ensureAuthenticated, async function(req, res, next) {
 	} else {
 		const allRecipes = await queries.allRecipesWithFavorites(req.user.id);
 
-		res.status(200).send(allRecipes);
+		res.json(allRecipes);
 	}
 });
 
