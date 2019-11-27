@@ -2,13 +2,38 @@ import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { makeStyles } from '@material-ui/styles';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
+import DeleteIcon from '@material-ui/icons/Delete';
+import EditRoundedIcon from '@material-ui/icons/EditRounded';
 import { Menu, MenuItem, Button, TextField } from '@material-ui/core';
 
 const useStyles = makeStyles({
 	container: {
 		padding: '0 30px',
+		'margin-bottom': '50px',
 	},
-	comment: {},
+	comment: {
+		border: '1px solid #00000020',
+		padding: '5px',
+	},
+	commentHeader: {
+		display: 'flex',
+	},
+	optionsButton: {
+		float: 'right',
+	},
+	posted: {
+		color: 'gray',
+		fontSize: '14px',
+		padding: '5px',
+		margin: 0,
+	},
+	editButtons: {
+		display: 'flex',
+		justifyContent: 'flex-end',
+	},
+	menuIcon: {
+		marginRight: '10px',
+	},
 });
 
 const Comments = ({ recipe, comments, user }) => {
@@ -22,11 +47,11 @@ const Comments = ({ recipe, comments, user }) => {
 		setCommentsArray(comments);
 	}, [comments]);
 
-	const handleSubmit = e => {
+	const handleSubmit = async e => {
 		e.preventDefault();
 		console.log('SUBMITTING');
 		try {
-			const res = fetch(`/comment/post`, {
+			const res = await fetch(`/comment/post`, {
 				method: 'PUT',
 				headers: {
 					'Content-Type': 'application/json',
@@ -37,16 +62,20 @@ const Comments = ({ recipe, comments, user }) => {
 				}),
 			});
 			const date = new Date().toString();
-			const newComment = {
-				userId: user.id,
-				recipeId: recipe.id,
-				username: user.user,
-				text: input,
-				created: date,
-				updated: date,
-			};
-			setCommentsArray([newComment, ...commentsArray]);
-			setInput('');
+			if (res.status === 200) {
+				const data = await res.json();
+				const newComment = {
+					userId: user.id,
+					recipeId: recipe.id,
+					username: user.user,
+					text: input,
+					created: date,
+					updated: date,
+					id: data.commentId,
+				};
+				setCommentsArray([newComment, ...commentsArray]);
+				setInput('');
+			} else throw new Error('Error inserting comment ', res);
 		} catch (e) {
 			console.error(e);
 		}
@@ -144,6 +173,7 @@ const Comments = ({ recipe, comments, user }) => {
 };
 
 const EditingComment = ({ comment, save, cancel }) => {
+	const classes = useStyles();
 	const [text, setText] = React.useState(comment.text);
 
 	const handleInput = e => {
@@ -155,12 +185,12 @@ const EditingComment = ({ comment, save, cancel }) => {
 	};
 
 	return (
-		<div style={{ border: '1px solid black' }} key={comment.created}>
+		<div className={classes.comment} key={comment.created}>
 			<div>
 				<NavLink to={`/user/${comment.username}`}>{comment.username}</NavLink>
 			</div>
 			<TextField style={{ width: '100%' }} value={text} onChange={handleInput} />
-			<div>
+			<div className={classes.editButtons}>
 				<Button onClick={cancel}>Cancel</Button>
 				<Button onClick={handleSave}>Save</Button>
 			</div>
@@ -169,7 +199,10 @@ const EditingComment = ({ comment, save, cancel }) => {
 };
 
 const Comment = ({ comment, user, handleEdit, handleDelete }) => {
+	const classes = useStyles();
 	const [anchorEl, setAnchorEl] = React.useState(null);
+
+	const date = new Date(comment.created);
 
 	const handleClick = event => {
 		setAnchorEl(event.currentTarget);
@@ -180,40 +213,43 @@ const Comment = ({ comment, user, handleEdit, handleDelete }) => {
 	};
 
 	return (
-		<div style={{ border: '1px solid black' }} key={comment.created}>
-			{comment.id ? (
-				comment.userId === user.id ? (
-					<React.Fragment>
-						<div style={{ float: 'right' }}>
-							<Button onClick={handleClick} value={comment.id}>
-								<MoreVertIcon />
-							</Button>
-							<Menu
-								anchorEl={anchorEl}
-								keepMounted
-								open={Boolean(anchorEl)}
-								onClose={handleClose}>
-								<MenuItem onClick={() => handleEdit(anchorEl.value)}>Edit</MenuItem>
-								<MenuItem
-									onClick={() => {
-										setAnchorEl(null);
-										handleDelete(anchorEl.value);
-									}}
-									value={comment.id}>
-									Delete
-								</MenuItem>
-							</Menu>
-						</div>
-					</React.Fragment>
-				) : null
-			) : (
-				<i style={{ float: 'right' }}>recently added</i>
-			)}
-			<div>
+		<div className={classes.comment} key={comment.created}>
+			{comment.userId === user.id ? (
+				<React.Fragment>
+					<div className={classes.optionsButton}>
+						<Button onClick={handleClick} value={comment.id}>
+							<MoreVertIcon />
+						</Button>
+						<Menu
+							anchorEl={anchorEl}
+							keepMounted
+							open={Boolean(anchorEl)}
+							onClose={handleClose}>
+							<MenuItem onClick={() => handleEdit(anchorEl.value)}>
+								<EditRoundedIcon className={classes.menuIcon} fontSize="small" />
+								Edit
+							</MenuItem>
+							<MenuItem
+								onClick={() => {
+									setAnchorEl(null);
+									handleDelete(anchorEl.value);
+								}}>
+								<DeleteIcon className={classes.menuIcon} fontSize="small" />
+								Delete
+							</MenuItem>
+						</Menu>
+					</div>
+				</React.Fragment>
+			) : null}
+			<div className={classes.commentHeader}>
 				<NavLink to={`/user/${comment.username}`}>{comment.username}</NavLink>
+				<label
+					className={
+						classes.posted
+					}>{`${date.getMonth()}-${date.getDay()}-${date.getFullYear()} ${
+					comment.created !== comment.updated ? '(edited)' : ''
+				}`}</label>
 			</div>
-			<div>created on: {comment.created}</div>
-			<div>edited on: {comment.updated}</div>
 			{comment.text}
 		</div>
 	);
