@@ -57,7 +57,7 @@ class App extends Component {
 			<MuiThemeProvider theme={theme}>
 				<BrowserRouter>
 					<AppNavbar user={user} logout={() => this.logout()} />
-					<div style={{ marginTop: '4rem' }}>
+					<div style={{ marginTop: '4rem', width: '100%', background: '#E8F1F2' }}>
 						<Route
 							exact
 							path="/"
