@@ -1,24 +1,31 @@
 import React, { Component } from 'react';
 import RecipeCard from '../base_components/RecipeCard';
-import { Link } from 'react-router-dom';
-import { Typography } from '@material-ui/core';
+import { Typography, Container, Button } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
-import Button from '@material-ui/core/Button';
 
 const UserStyle = theme => ({
 	landingContainer: {
 		// margin: theme.spacing.unit * 2,
 	},
 	userCard: {
+		position: 'relative',
 		display: 'flex',
 		border: '2px solid #000000',
 		'border-radius': '5px',
 		'box-shadow': '5px 6px 0px #E0E0E0',
 		margin: '20px',
 		padding: '10px',
+		background: '#ffffff',
 	},
 	userDetails: {
 		margin: '10px 30px',
+	},
+	userRecipes: {
+		width: '100%',
+		display: 'grid',
+		'grid-auto-flow': 'row',
+		// repeats as many times as it can; min width 500px
+		'grid-template-columns': 'repeat(auto-fit, minmax(500px, 1fr))',
 	},
 	profilePic: {
 		width: '150px',
@@ -26,10 +33,18 @@ const UserStyle = theme => ({
 		'border-radius': '50%',
 		border: '2px solid #000000',
 	},
-	userLinks: {
-		width: '100px',
+	recipes: {
 		display: 'flex',
-		'flex-direction': 'column',
+		flexDirection: 'column',
+		alignItems: 'center',
+	},
+	recipe: {
+		margin: '10px',
+	},
+	follow: {
+		position: 'absolute',
+		top: '15px',
+		right: '20px',
 	},
 });
 
@@ -121,25 +136,12 @@ class User extends Component {
 	};
 
 	render() {
-		const { classes } = this.props;
+		const { classes, user } = this.props;
 		const { id, firstName, lastName, email, username } = this.state;
 		const urlUser = this.props.location.pathname.split('/').pop();
-		const { user } = this.props;
-		const { recipes } = this.state;
-		let ownProfile = false;
-		if (user && user.user === urlUser) {
-			ownProfile = true;
-		}
-		console.log(ownProfile);
+		const { recipes, followed } = this.state;
+		const ownProfile = user && user.user === urlUser ? true : false;
 
-		let followSection = '';
-		if (!ownProfile) {
-			if (this.state.followed) {
-				followSection = <Typography>Folllowed</Typography>;
-			} else {
-				followSection = <Button onClick={this.followUser}>Follow</Button>;
-			}
-		}
 		return (
 			<div className={classes.landingContainer}>
 				<div className={classes.userCard}>
@@ -149,32 +151,33 @@ class User extends Component {
 						<label>{`@${username}`}</label>
 						<p>{`Email: ${email}`}</p>
 					</div>
+					{!ownProfile ? (
+						<div className={classes.follow}>
+							{followed ? (
+								<Typography>Followed</Typography>
+							) : (
+								<Button
+									variant="contained"
+									color="secondary"
+									onClick={this.followUser}>
+									Follow
+								</Button>
+							)}
+						</div>
+					) : null}
 				</div>
-				{ownProfile ? <UserLinks classes={classes} signout={() => this.signout()} /> : null}
-				{followSection}
-				<div>
+				<Container className={classes.recipes}>
 					<h2>{`${firstName}'s recipes:`}</h2>
-					{recipes.length > 0 ? (
-						recipes.map(recipe => (
-							<RecipeCard recipe={recipe} /*className={classes.recipeCard}*/ />
-						))
-					) : (
-						<label>This user hasn't posted any recipes yet</label>
-					)}
-				</div>
-			</div>
-		);
-	}
-}
-
-class UserLinks extends Component {
-	render() {
-		const { classes } = this.props;
-		return (
-			<div className={classes.userLinks}>
-				<button>Basket</button>
-				<button onClick={this.props.signout}>Sign out</button>
-				<Link to="/profile">Profile</Link>
+					<div className={classes.userRecipes}>
+						{recipes.length > 0 ? (
+							recipes.map(recipe => (
+								<RecipeCard recipe={recipe} className={classes.recipe} />
+							))
+						) : (
+							<label>This user hasn't posted any recipes yet</label>
+						)}
+					</div>
+				</Container>
 			</div>
 		);
 	}
