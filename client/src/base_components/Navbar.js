@@ -21,8 +21,10 @@ export default class AppNavbar extends Component {
 				<Navbar.Toggle aria-controls="basic-navbar-nav" />
 				<Navbar.Collapse id="basic-navbar-nav">
 					<Nav>
-              <Link className='navLink' style={this.navlinkStyle} to='/feed'>Feed</Link>
-          </Nav>
+						<Link className="navLink" style={this.navlinkStyle} to="/feed">
+							Feed
+						</Link>
+					</Nav>
 					<Nav className="mr-auto">
 						{this.props.user ? (
 							<SignedIn
@@ -47,7 +49,33 @@ export default class AppNavbar extends Component {
 }
 
 class SignedIn extends Component {
+	state = {
+		notifications: [{ message: 'no notifications' }],
+	};
+	handleNotifications = async () => {
+		console.log('clicked notifications');
+		const res = await fetch('/api/notifications', { method: 'POST' });
+		const notifications = await res.json();
+		console.log(notifications);
+		this.setState({ notifications });
+	};
+
 	render() {
+		const notifications = this.state.notifications.map(i => {
+			let message;
+			switch (i.message) {
+				case 0:
+					message = `user ${i.senderId} has followed you`;
+					break;
+				case 1:
+					message = `user ${i.senderId} has commented on your post`;
+					break;
+				default:
+					message = 'no notifications';
+					break;
+			}
+			return <p>{message}</p>;
+		});
 		return (
 			<React.Fragment>
 				<Nav>
@@ -83,6 +111,18 @@ class SignedIn extends Component {
 						<Dropdown.Item as="button" onClick={this.props.logout}>
 							Sign out
 						</Dropdown.Item>
+					</DropdownButton>
+				</Nav>
+				<Nav>
+					<DropdownButton
+						id="notifications"
+						size="sm"
+						variant="Success"
+						className="navbar-custom"
+						style={{ alignSelf: 'center', color: 'white' }}
+						title="Notifications"
+						onClick={this.handleNotifications}>
+						{notifications}
 					</DropdownButton>
 				</Nav>
 			</React.Fragment>

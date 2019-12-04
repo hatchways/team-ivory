@@ -58,11 +58,11 @@ function HowItWorks(props) {
 	return (
 		<section className={classes.root}>
 			<Container className={classes.container}>
-				<img
+				{/* <img
 					src="/static/themes/onepirate/productCurvyLines.png"
 					className={classes.curvyLines}
 					alt="curvy lines"
-				/>
+				/> */}
 				<Typography variant="h4" marked="center" className={classes.title} component="h2">
 					How it works
 				</Typography>
