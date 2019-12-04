@@ -18,6 +18,7 @@ import AppNavbar from './base_components/Navbar';
 import ChangePassword from './pages/ChangePassword';
 import Favorites from './pages/Favorites';
 import Recipe from './pages/Recipe';
+import Following from './pages/Following';
 
 import './App.css';
 
@@ -80,6 +81,7 @@ class App extends Component {
 						render={props => <Favorites {...props} user={user} />}
 					/>
 					<Route exact path="/user/passwords/change" component={ChangePassword} />
+					<Route exact path="/following" component={Following} />
 					<Route
 						exact
 						path="/login"

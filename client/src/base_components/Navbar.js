@@ -21,9 +21,23 @@ const Styles = theme => ({
 });
 
 class AppNavbar extends Component {
+	constructor(props) {
+		super(props);
+		this.state = { windowWidth: window.innerWidth };
+	}
+
+	componentDidMount() {
+		window.addEventListener('resize', () => this.getWindowWidth());
+	}
+
+	getWindowWidth() {
+		this.setState({ windowWidth: window.innerWidth });
+	}
+
 	render() {
 		const { user, classes, history } = this.props;
-		console.log(user);
+		const { windowWidth } = this.state;
+		console.log(windowWidth);
 		return (
 			<React.Fragment>
 				<AppBar position="static" className={classes.container}>
@@ -34,8 +48,12 @@ class AppNavbar extends Component {
 						<Button href="/feed">Recipes</Button>
 						{Boolean(user) ? (
 							<React.Fragment>
-								<Button>Following</Button>
-								<Button href="/builder">Post Recipe</Button>
+								{windowWidth > 600 ? (
+									<React.Fragment>
+										<Button href="/following">Following</Button>
+										<Button href="/builder">Post Recipe</Button>
+									</React.Fragment>
+								) : null}
 								<div className={classes.grow}></div>
 								<IconButton href="/notifications">
 									<NotificationsIcon />
@@ -43,6 +61,7 @@ class AppNavbar extends Component {
 								<UserMenu
 									user={user}
 									history={history}
+									windowWidth={windowWidth}
 									logout={this.props.logout}
 								/>
 							</React.Fragment>
@@ -76,7 +95,7 @@ class UserMenu extends Component {
 	}
 	render() {
 		const { anchorEl } = this.state;
-		const { user } = this.props;
+		const { user, windowWidth } = this.props;
 		return (
 			<div>
 				<IconButton onClick={e => this.setAnchor(e)}>
@@ -89,9 +108,15 @@ class UserMenu extends Component {
 					<MenuItem onClick={() => this.navTo(`/user/${user.user}`)}>
 						{user.name}
 					</MenuItem>
+					{windowWidth < 601 ? (
+						<MenuItem onClick={() => this.navTo('/following')}>Following</MenuItem>
+					) : null}
 					<MenuItem onClick={() => this.navTo(`/user/${user.username}/favorites`)}>
 						Favorites
 					</MenuItem>
+					{windowWidth < 601 ? (
+						<MenuItem onClick={() => this.navTo('/builder')}>Post Recipe</MenuItem>
+					) : null}
 					<MenuItem onClick={() => this.navTo('/cart')}>Cart</MenuItem>
 					<MenuItem onClick={() => this.navTo('/profile')}>Account</MenuItem>
 					<MenuItem onClick={this.props.logout}>Logout</MenuItem>

@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { Button } from '@material-ui/core';
-
 import { withStyles } from '@material-ui/core/styles';
 
 const ProfileStyles = theme => ({
@@ -14,6 +13,7 @@ const ProfileStyles = theme => ({
 		'box-shadow': '5px 6px 0px #E0E0E0',
 		display: 'flex',
 		alignItems: 'center',
+		background: '#ffffff',
 	},
 	profilePic: {
 		marginLeft: '10px',
