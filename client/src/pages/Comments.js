@@ -8,8 +8,14 @@ import { Menu, MenuItem, Button, TextField } from '@material-ui/core';
 
 const useStyles = makeStyles({
 	container: {
-		padding: '0 30px',
+		margin: 'auto',
+		maxWidth: '1000px',
+		minWidth: '800px',
 		'margin-bottom': '50px',
+	},
+	newComment: {},
+	commentInput: {
+		width: '100%',
 	},
 	comment: {
 		border: '1px solid #00000020',
@@ -139,12 +145,17 @@ const Comments = ({ recipe, comments, user }) => {
 	return (
 		<div className={classes.container}>
 			<h1>Comments</h1>
-			<form onSubmit={handleSubmit}>
-				<input
+			<form onSubmit={handleSubmit} className={classes.newComment}>
+				<TextField
+					className={classes.commentInput}
 					onChange={handleInput}
 					value={input}
-					placeholder={'Add a public comment...'}></input>
-				<button type="submit">Submit</button>
+					placeholder={'Add a public comment...'}
+				/>
+				<div className={classes.editButtons}>
+					<Button onClick={() => setInput('')}>Cancel</Button>
+					<Button type="submit">Comment</Button>
+				</div>
 			</form>
 			{commentsArray ? (
 				<React.Fragment>
@@ -189,7 +200,7 @@ const EditingComment = ({ comment, save, cancel }) => {
 			<div>
 				<NavLink to={`/user/${comment.username}`}>{comment.username}</NavLink>
 			</div>
-			<TextField style={{ width: '100%' }} value={text} onChange={handleInput} />
+			<TextField className={classes.commentInput} value={text} onChange={handleInput} />
 			<div className={classes.editButtons}>
 				<Button onClick={cancel}>Cancel</Button>
 				<Button onClick={handleSave}>Save</Button>
@@ -246,7 +257,7 @@ const Comment = ({ comment, user, handleEdit, handleDelete }) => {
 				<label
 					className={
 						classes.posted
-					}>{`${date.getMonth()}-${date.getDay()}-${date.getFullYear()} ${
+					}>{`${date.getMonth()}-${date.getDate()}-${date.getFullYear()} ${
 					comment.created !== comment.updated ? '(edited)' : ''
 				}`}</label>
 			</div>

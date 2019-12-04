@@ -18,6 +18,44 @@ var imageUpload = multer({
 	}),
 }).single('image');
 
+router.get('/recipes/following', ensureAuthenticated, async (req, res, next) => {
+	req.user.id;
+	const result = await models.followers.findAll({
+		where: { followerId: req.user.id },
+		attributes: ['userId'],
+	});
+	let following = [];
+	result.forEach(el => following.push(el.dataValues.userId));
+	console.log(following);
+	const recipes = await models.recipes.findAll({
+		where: { userId: following },
+		include: [models.ingredients],
+	});
+	console.log(recipes);
+	res.status(200).send(
+		recipes.map(recipe => ({
+			id: recipe.i,
+			user: recipe.userId,
+			name: recipe.name,
+			imageUrl: recipe.image.replace('public', ''),
+			steps: recipe.steps,
+			tags: recipe.tags,
+			created: recipe.createdAt,
+			ingredients: recipe.ingredients.map(ingredient => {
+				return {
+					ingredient: {
+						label: ingredient.name,
+					},
+					quantity: ingredient.quantity,
+					unit: {
+						label: ingredient.unit,
+					},
+				};
+			}),
+		}))
+	);
+});
+
 //placeholder to check for recipe upload
 router.get('/recipes', ensureAuthenticated, async function(req, res, next) {
 	const checkUsersFollowing = await queries.usersFollowing(req.user.id);

@@ -18,6 +18,7 @@ import AppNavbar from './base_components/Navbar';
 import ChangePassword from './pages/ChangePassword';
 import Favorites from './pages/Favorites';
 import Recipe from './pages/Recipe';
+import Following from './pages/Following';
 
 import './App.css';
 
@@ -61,58 +62,57 @@ class App extends Component {
 		return (
 			<MuiThemeProvider theme={theme}>
 				<BrowserRouter>
-					<AppNavbar user={user} logout={() => this.logout()} />
-					<div style={{ marginTop: '4rem' }}>
-						<Route
-							exact
-							path="/"
-							render={props => <LandingPage {...props} user={user} />}
-						/>
-						<Route exact path="/builder" component={BuilderPage} />
-						<Route
-							exact
-							path="/feed"
-							render={props => <Feed {...props} user={user} />}
-						/>
-						<Route exact path="/cart" component={Cart} />
-						<Route
-							exact
-							path="/recipe/:recipeId"
-							render={props => <Recipe {...props} user={user} />}
-						/>
-						<Route
-							exact
-							path="/user/:username/favorites"
-							render={props => <Favorites {...props} user={user} />}
-						/>
-						<Route exact path="/user/passwords/change" component={ChangePassword} />
-						<Route
-							exact
-							path="/login"
-							render={props => (
-								<Login
-									{...props}
-									updateUser={() => this.updateUser()}
-									username={this.state}
-								/>
-							)}
-						/>
-						<Route exact path="/signup" component={Signup} />
-						<Route
-							exact
-							path="/profile"
-							render={props => (
-								<Profile {...props} updateUser={() => this.updateUser()} />
-							)}
-						/>
-						<Route
-							exact
-							path={`/user/:username`}
-							render={props => (
-								<User {...props} user={user} logout={() => this.logout()} />
-							)}
-						/>
-					</div>
+					<Route
+						render={props => (
+							<AppNavbar {...props} user={user} logout={() => this.logout()} />
+						)}
+					/>
+					<Route
+						exact
+						path="/"
+						render={props => <LandingPage {...props} user={user} />}
+					/>
+					<Route exact path="/builder" component={BuilderPage} />
+					<Route exact path="/feed" render={props => <Feed {...props} user={user} />} />
+					<Route exact path="/cart" component={Cart} />
+					<Route
+						exact
+						path="/recipe/:recipeId"
+						render={props => <Recipe {...props} user={user} />}
+					/>
+					<Route
+						exact
+						path="/user/:username/favorites"
+						render={props => <Favorites {...props} user={user} />}
+					/>
+					<Route exact path="/user/passwords/change" component={ChangePassword} />
+					<Route exact path="/following" component={Following} />
+					<Route
+						exact
+						path="/login"
+						render={props => (
+							<Login
+								{...props}
+								updateUser={() => this.updateUser()}
+								username={this.state}
+							/>
+						)}
+					/>
+					<Route exact path="/signup" component={Signup} />
+					<Route
+						exact
+						path="/profile"
+						render={props => (
+							<Profile {...props} updateUser={() => this.updateUser()} />
+						)}
+					/>
+					<Route
+						exact
+						path={`/user/:username`}
+						render={props => (
+							<User {...props} user={user} logout={() => this.logout()} />
+						)}
+					/>
 				</BrowserRouter>
 			</MuiThemeProvider>
 		);

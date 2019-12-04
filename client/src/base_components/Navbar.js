@@ -1,143 +1,202 @@
 import React, { Component } from 'react';
-import { Nav, Navbar, Form, FormControl, Button, Dropdown, DropdownButton } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import {
+	AppBar,
+	Button,
+	Toolbar,
+	IconButton,
+	Menu,
+	MenuItem,
+	ListItemIcon,
+} from '@material-ui/core';
+import AccountCircle from '@material-ui/icons/AccountCircle';
+import NotificationsIcon from '@material-ui/icons/Notifications';
+import PeopleIcon from '@material-ui/icons/People';
+import CommentIcon from '@material-ui/icons/Comment';
 import '../css/navbar.css';
+import { withStyles } from '@material-ui/styles';
 
-export default class AppNavbar extends Component {
-	navbarStyle = {
-		boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
+const Styles = theme => ({
+	container: {
+		background: '#A9E190',
 		zIndex: 3,
-		backgroundColor: 'limegreen',
-	};
+	},
+	title: {
+		fontSize: '1.2em',
+	},
+	grow: {
+		flexGrow: 1,
+	},
+});
 
-	render() {
-		return (
-			<Navbar expand="lg" style={this.navbarStyle} fixed="top">
-				<Navbar.Brand to="/">
-					<Link className="navLink" style={this.navlinkStyle} to="/">
-						Ingridify
-					</Link>
-				</Navbar.Brand>
-				<Navbar.Toggle aria-controls="basic-navbar-nav" />
-				<Navbar.Collapse id="basic-navbar-nav">
-					<Nav>
-						<Link className="navLink" style={this.navlinkStyle} to="/feed">
-							Feed
-						</Link>
-					</Nav>
-					<Nav className="mr-auto">
-						{this.props.user ? (
-							<SignedIn
-								name={this.props.user.name}
-								username={this.props.user.user}
-								logout={this.props.logout}
-							/>
-						) : (
-							<AnonUser />
-						)}
-					</Nav>
-					<Form inline>
-						<FormControl type="text" placeholder="Search" className="mr-sm-2" />
-						<Button className="navSearch" variant="outline-info">
-							Search
-						</Button>
-					</Form>
-				</Navbar.Collapse>
-			</Navbar>
-		);
+class AppNavbar extends Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			windowWidth: window.innerWidth,
+			notifications: [{ message: 'no notifications' }],
+		};
 	}
-}
 
-class SignedIn extends Component {
-	state = {
-		notifications: [{ message: 'no notifications' }],
-	};
 	handleNotifications = async () => {
 		console.log('clicked notifications');
 		const res = await fetch('/api/notifications', { method: 'POST' });
-		const notifications = await res.json();
+		let notifications = [];
+		if (res.status === 200) notifications = await res.json();
 		console.log(notifications);
 		this.setState({ notifications });
 	};
 
+	componentDidMount() {
+		window.addEventListener('resize', () => this.getWindowWidth());
+		this.handleNotifications();
+	}
+
+	getWindowWidth() {
+		this.setState({ windowWidth: window.innerWidth });
+	}
+
 	render() {
-		const notifications = this.state.notifications.map(i => {
-			let message;
-			switch (i.message) {
-				case 0:
-					message = `user ${i.senderId} has followed you`;
-					break;
-				case 1:
-					message = `user ${i.senderId} has commented on your post`;
-					break;
-				default:
-					message = 'no notifications';
-					break;
-			}
-			return <p>{message}</p>;
-		});
+		const { user, classes, history } = this.props;
+		const { windowWidth, notifications } = this.state;
+		console.log(windowWidth);
 		return (
 			<React.Fragment>
-				<Nav>
-					<Link className="navLink" style={this.navlinkStyle} to="/builder">
-						Builder
-					</Link>
-				</Nav>
-				<Nav>
-					<Link className="navLink" style={this.navlinkStyle} to="/notifications">
-						Notifications
-					</Link>
-				</Nav>
-				<Nav>
-					<Link className="navLink" style={this.navlinkStyle} to="/cart">
-						Cart
-					</Link>
-				</Nav>
-				<Nav>
-					<DropdownButton
-						id="userDropDownMenu"
-						size="sm"
-						variant="Success"
-						className="navbar-custom"
-						style={{ alignSelf: 'center', color: 'white' }}
-						title={this.props.name}>
-						<Dropdown.Item href={`/user/${this.props.username}`}>
-							{this.props.username}
-						</Dropdown.Item>
-						<Dropdown.Item href={`/user/${this.props.username}/favorites`}>
-							Favorites
-						</Dropdown.Item>
-						<Dropdown.Item href={'/profile'}>Edit Profile</Dropdown.Item>
-						<Dropdown.Item as="button" onClick={this.props.logout}>
-							Sign out
-						</Dropdown.Item>
-					</DropdownButton>
-				</Nav>
-				<Nav>
-					<DropdownButton
-						id="notifications"
-						size="sm"
-						variant="Success"
-						className="navbar-custom"
-						style={{ alignSelf: 'center', color: 'white' }}
-						title="Notifications"
-						onClick={this.handleNotifications}>
-						{notifications}
-					</DropdownButton>
-				</Nav>
+				<AppBar position="static" className={classes.container}>
+					<Toolbar>
+						<Button className={classes.title} href="/">
+							Ingridify
+						</Button>
+						<Button href="/feed">Recipes</Button>
+						{Boolean(user) ? (
+							<React.Fragment>
+								{windowWidth > 600 ? (
+									<React.Fragment>
+										<Button href="/following">Following</Button>
+										<Button href="/builder">Post Recipe</Button>
+									</React.Fragment>
+								) : null}
+								<div className={classes.grow}></div>
+								<UserNotifications
+									user={user}
+									history={history}
+									notifications={notifications}
+									windowWidth={windowWidth}
+									logout={this.props.logout}
+								/>
+								<UserMenu
+									user={user}
+									history={history}
+									windowWidth={windowWidth}
+									logout={this.props.logout}
+								/>
+							</React.Fragment>
+						) : (
+							<React.Fragment>
+								<div className={classes.grow}></div>
+								<Button href="/login">Login</Button>
+							</React.Fragment>
+						)}
+					</Toolbar>
+				</AppBar>
 			</React.Fragment>
 		);
 	}
 }
 
-class AnonUser extends Component {
+class UserNotifications extends Component {
+	state = { anchorEl: null };
+	setAnchor(e) {
+		this.setState({ anchorEl: e.currentTarget });
+	}
+
+	handleClose() {
+		this.setState({ anchorEl: null });
+	}
+
+	navTo(target) {
+		this.handleClose();
+		this.props.history.push(target);
+	}
 	render() {
+		const { anchorEl } = this.state;
+		const { user, windowWidth, notifications } = this.props;
+		console.log(notifications);
+		// const notifications = [];
 		return (
-			<React.Fragment>
-				<Link className="navLink" style={this.navlinkStyle} to="/login">
-					Login/Sign up
-				</Link>
-			</React.Fragment>
+			<div>
+				<IconButton onClick={e => this.setAnchor(e)}>
+					<NotificationsIcon />
+				</IconButton>
+				<Menu
+					style={{ maxHeight: '600px' }}
+					open={Boolean(anchorEl)}
+					anchorEl={anchorEl}
+					onClose={() => this.handleClose()}>
+					{notifications.length === 0 ? (
+						<MenuItem onClick={() => this.handleClose()}>No notifications</MenuItem>
+					) : null}
+					{notifications.map(el => (
+						<MenuItem>
+							<ListItemIcon>
+								{el.message === 0 ? <PeopleIcon /> : <CommentIcon />}
+							</ListItemIcon>
+							{el.message === 0
+								? `user ${el.senderId} followed you`
+								: `user ${el.senderId} commented on your post`}
+						</MenuItem>
+					))}
+				</Menu>
+			</div>
 		);
 	}
 }
+
+class UserMenu extends Component {
+	state = { anchorEl: null };
+
+	setAnchor(e) {
+		this.setState({ anchorEl: e.currentTarget });
+	}
+
+	handleClose() {
+		this.setState({ anchorEl: null });
+	}
+
+	navTo(target) {
+		this.handleClose();
+		this.props.history.push(target);
+	}
+	render() {
+		const { anchorEl } = this.state;
+		const { user, windowWidth } = this.props;
+		return (
+			<div>
+				<IconButton onClick={e => this.setAnchor(e)}>
+					<AccountCircle />
+				</IconButton>
+				<Menu
+					open={Boolean(anchorEl)}
+					anchorEl={anchorEl}
+					onClose={() => this.handleClose()}>
+					<MenuItem onClick={() => this.navTo(`/user/${user.user}`)}>
+						{user.name}
+					</MenuItem>
+					{windowWidth < 601 ? (
+						<MenuItem onClick={() => this.navTo('/following')}>Following</MenuItem>
+					) : null}
+					<MenuItem onClick={() => this.navTo(`/user/${user.username}/favorites`)}>
+						Favorites
+					</MenuItem>
+					{windowWidth < 601 ? (
+						<MenuItem onClick={() => this.navTo('/builder')}>Post Recipe</MenuItem>
+					) : null}
+					<MenuItem onClick={() => this.navTo('/cart')}>Cart</MenuItem>
+					<MenuItem onClick={() => this.navTo('/profile')}>Account</MenuItem>
+					<MenuItem onClick={this.props.logout}>Logout</MenuItem>
+				</Menu>
+			</div>
+		);
+	}
+}
+
+export default withStyles(Styles)(AppNavbar);
