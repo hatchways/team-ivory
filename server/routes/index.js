@@ -7,6 +7,10 @@ const jwt = require('../config/jwt')['jwtManager'];
 const { ensureAuthenticated } = require('../config/auth');
 const Op = models.Sequelize.Op;
 
+router.get('/',(req, res, next) => {
+	console.log("You are on the landing page!");
+});
+
 router.get('/welcome', ensureAuthenticated, function(req, res, next) {
 	models.users.findAll({}).then(function(users) {
 		let testUser = users[0].dataValues;

@@ -353,4 +353,11 @@ router.post('/followers', ensureAuthenticated, function(req, res) {
 			});
 	}
 });
+
+router.post('/notifications', ensureAuthenticated, async function(req, res) {
+	console.log('notifications route');
+	const notifications = await models.notifications.findAll();
+
+	res.json(notifications);
+});
 module.exports = router;
