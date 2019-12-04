@@ -4,7 +4,7 @@ import { BrowserRouter, Route } from 'react-router-dom';
 import { createBrowserHistory } from 'history';
 import Cookies from 'js-cookie';
 import 'bootstrap/dist/css/bootstrap.min.css';
-
+import io from 'socket.io-client';
 import { theme } from './themes/theme';
 import LandingPage from './pages/Landing';
 import BuilderPage from './pages/Builder';
@@ -27,6 +27,11 @@ class App extends Component {
 	state = { user: null };
 
 	componentDidMount() {
+		const socket = io('http://localhost:3000');
+		console.log('Socket connected', socket);
+		socket.on('outgoing data', data => {
+			socket.broadcast.emit('outgoing data', { hello: 'world' });
+		});
 		this.updateUser();
 	}
 
