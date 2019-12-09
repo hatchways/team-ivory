@@ -91,9 +91,9 @@ export default function RecipeCard(props) {
 			});
 			if (updateFavorite.status === 200) {
 				if (favorited) {
-					setLikes(likes - 1);
+					setLikes(parseInt(likes) - 1);
 				} else {
-					setLikes(likes + 1);
+					setLikes(parseInt(likes) + 1);
 				}
 				setFavorited(!favorited);
 			}
