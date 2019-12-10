@@ -4,7 +4,7 @@ var models = require('../models');
 var multer = require('multer');
 const queries = require('../db/queries');
 const path = require('path');
-const { ensureAuthenticated } = require('../config/auth');
+const { ensureAuthenticated, getCurrentUser } = require('../middleware/auth');
 
 //image upload parameters for the recipe image
 var imageUpload = multer({
@@ -56,86 +56,54 @@ router.get('/recipes/following', ensureAuthenticated, async (req, res, next) => 
 	);
 });
 
-//placeholder to check for recipe upload
-router.get('/recipes', ensureAuthenticated, async function(req, res, next) {
-	const checkUsersFollowing = await queries.usersFollowing(req.user.id);
-	console.log(checkUsersFollowing);
-	if ('id' in req.query) {
-		const { id } = req.query;
+// Get all all recipes
+router.get('/recipes', getCurrentUser, async function(req, res, next) {
+	console.log('REQUEST USER: ');
+	console.log(req.user);
 
-		models.recipes
-			.findOne({
-				where: { id: id },
-			})
-			.then(recipe => {
-				res.status(200).send({
-					recipe: {
-						name: recipe.name,
-						imageUrl: recipe.image.replace('public', ''),
+	// Get recipes for logged in user
+	console.info('Getting recipes with favorites');
+	const recipes = await models.recipes.findAll({
+		include: [
+			{
+				model: models.ingredients,
+			},
+			{
+				model: models.favorites,
+			},
+		],
+	});
+	const result = recipes.map(recipe => {
+		// Check if user is logged in, and if so if they liked the recipe
+		const favorited = req.user
+			? recipe.dataValues.favorites.some(el => el.userId === req.user.id)
+			: false;
+		const likes = recipe.dataValues.favorites.length;
+		return {
+			id: recipe.id,
+			user: recipe.userId,
+			name: recipe.name,
+			imageUrl: recipe.image.replace('public', ''),
+			steps: recipe.steps,
+			tags: recipe.tags,
+			likes,
+			favorited,
+			created: recipe.createdAt,
+			ingredients: recipe.ingredients.map(ingredient => {
+				return {
+					ingredient: {
+						label: ingredient.name,
 					},
-				});
-			});
-	} else if (req.user && checkUsersFollowing[0]) {
-		models.recipes.hasMany(models.favorites, { foreignKey: 'recipeId' });
-		models.followers.findAll({ where: { followerId: req.user.id } }).then(followed => {
-			models.recipes
-				.findAll({
-					include: [
-						{ model: models.ingredients },
-						{
-							model: models.favorites,
-							where: {
-								userId: followed.map(follower => {
-									return follower.userId;
-								}),
-							},
-						},
-					],
-					order: [['id', 'ASC']],
-				})
-				.then(recipes => {
-					res.status(200).send(
-						recipes.map(recipe => {
-							// console.log(recipe.ingredients)
-							return {
-								id: recipe.id,
-								user: recipe.userId,
-								name: recipe.name,
-								imageUrl: recipe.image.replace('public', ''),
-								steps: recipe.steps,
-								tags: recipe.tags,
-								// checks if there is a favorites relationship and then checks if the relationship belongs to current user
-								favorited: recipe.dataValues.favorites[0]
-									? recipe.dataValues.favorites.some(
-											favorite =>
-												favorite.dataValues.userId === req.user.id &&
-												favorite.dataValues.favorited === 1
-									  )
-										? 1
-										: 0
-									: 0,
-								created: recipe.createdAt,
-								ingredients: recipe.ingredients.map(ingredient => {
-									return {
-										ingredient: {
-											label: ingredient.name,
-										},
-										quantity: ingredient.quantity,
-										unit: {
-											label: ingredient.unit,
-										},
-									};
-								}),
-							};
-						})
-					);
-				});
-		});
-	} else {
-		const allRecipes = await queries.allRecipesWithFavorites(req.user.id);
+					quantity: ingredient.quantity,
+					unit: {
+						label: ingredient.unit,
+					},
+				};
+			}),
+		};
+	});
 
-		res.json(allRecipes);
-	}
+	return res.status(200).send(result);
 });
 
 //post handler for the recipe builder
