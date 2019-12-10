@@ -39,9 +39,28 @@ io.on('connection', socket => {
 	socket.on('incoming data', data => {
 		//Here we broadcast it out to all other sockets EXCLUDING the socket which sent us the data
 		console.log(data);
-		socket.broadcast.emit('outgoing data', { hello: 'world' });
 	});
 
+	socket.on('woot', (data, send) => {
+		console.log("SOCKET WOOT WOOT WOOT");
+		console.log(data);
+		send('WOOOHOOOOO');
+	})
+
+	socket.on('comment', (data, send) => {
+		console.log("COMMENT SOCKET SERVER");
+		console.log(data);
+		send('SENT THE COMMENT');
+		socket.broadcast.emit('comment', data)
+	})
+
+	socket.on('follow', (data, send) => {
+		console.log("FOLLOW SOCKET SERVER");
+		console.log(data);
+		send('SENT THE FOLLOW');
+		socket.broadcast.emit('follow', data)
+	})
+	
 	socket.on('disconnect', () => {
 		console.log('User disconnected');
 	});
