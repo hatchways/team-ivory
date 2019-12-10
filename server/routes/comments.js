@@ -13,10 +13,11 @@ router.put('/post', ensureAuthenticated, async (req, res) => {
 		text: req.body.text,
 	});
 
-	console.log(result.dataValues);
-
+	const recipe = await models.recipes.findAll({
+		where: { id: req.body.recipeId },
+	});
 	if (result[0] !== 0) {
-		return res.json({ msg: 'success', commentId: result.dataValues.id });
+		return res.json({ userId: recipe[0].dataValues.userId, commentId: result.dataValues.id });
 	}
 	res.json({ msg: 'failed' });
 });

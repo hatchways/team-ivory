@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import { NavLink } from 'react-router-dom';
+
 import {
 	AppBar,
 	Button,
@@ -10,15 +12,17 @@ import {
 } from '@material-ui/core';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import NotificationsIcon from '@material-ui/icons/Notifications';
+import NotificationsActiveIcon from '@material-ui/icons/NotificationsActive';
 import PeopleIcon from '@material-ui/icons/People';
 import CommentIcon from '@material-ui/icons/Comment';
 import '../css/navbar.css';
 import { withStyles } from '@material-ui/styles';
+import Snackbar from '@material-ui/core/Snackbar';
 
 const Styles = theme => ({
 	container: {
 		background: '#A9E190',
-		zIndex: 3,
+		zIndex: -4,
 	},
 	title: {
 		fontSize: '1.2em',
@@ -39,10 +43,9 @@ class AppNavbar extends Component {
 
 	handleNotifications = async () => {
 		console.log('clicked notifications');
-		const res = await fetch('/api/notifications', { method: 'POST' });
+		const res = await fetch('/api/notifications', { method: 'GET' });
 		let notifications = [];
 		if (res.status === 200) notifications = await res.json();
-		console.log(notifications);
 		this.setState({ notifications });
 	};
 
@@ -56,7 +59,7 @@ class AppNavbar extends Component {
 	}
 
 	render() {
-		const { user, classes, history } = this.props;
+		const { user, classes, history, socket } = this.props;
 		const { windowWidth, notifications } = this.state;
 		console.log(windowWidth);
 		return (
@@ -82,6 +85,8 @@ class AppNavbar extends Component {
 									notifications={notifications}
 									windowWidth={windowWidth}
 									logout={this.props.logout}
+									socket={socket}
+									classes={classes}
 								/>
 								<UserMenu
 									user={user}
@@ -104,13 +109,37 @@ class AppNavbar extends Component {
 }
 
 class UserNotifications extends Component {
-	state = { anchorEl: null };
+	state = { anchorEl: null, notifications: [], newNotification: false };
+
+	componentDidUpdate(prevProps) {
+		if (this.props !== prevProps) {
+			console.log(this.props);
+			const { socket } = this.props;
+			// Listens for comments by other users
+			socket.on('comment', res => {
+				this.setState({
+					notifications: [res, ...this.state.notifications],
+					newNotification: true,
+				});
+			});
+			// Listens for follows by others
+			socket.on('follow', res => {
+				this.setState({
+					notifications: [res, ...this.state.notifications],
+					newNotification: true,
+				});
+			});
+
+			this.setState({ notifications: this.props.notifications });
+		}
+	}
+
 	setAnchor(e) {
-		this.setState({ anchorEl: e.currentTarget });
+		this.setState({ anchorEl: e.currentTarget, newNotification: false });
 	}
 
 	handleClose() {
-		this.setState({ anchorEl: null });
+		this.setState({ anchorEl: null, newNotification: false });
 	}
 
 	navTo(target) {
@@ -118,15 +147,37 @@ class UserNotifications extends Component {
 		this.props.history.push(target);
 	}
 	render() {
-		const { anchorEl } = this.state;
-		const { user, windowWidth, notifications } = this.props;
-		console.log(notifications);
-		// const notifications = [];
+		const { anchorEl, newNotification, notifications, transition } = this.state;
+		const { user, windowWidth, classes } = this.props;
+		let message;
+		if (newNotification) {
+			if (notifications[0].message === 1) {
+				message = `User ${notifications[0].senderId} has commented on your recipe.`;
+			} else {
+				message = `User ${notifications[0].userId} has followed you.`;
+			}
+		}
 		return (
 			<div>
-				<IconButton onClick={e => this.setAnchor(e)}>
-					<NotificationsIcon />
-				</IconButton>
+				{newNotification ? (
+					<React.Fragment>
+						<IconButton onClick={e => this.setAnchor(e)}>
+							<NotificationsActiveIcon style={{ color: 'red' }} />
+						</IconButton>
+						<Snackbar
+							anchorOrigin={{
+								vertical: 'bottom',
+								horizontal: 'left',
+							}}
+							open={newNotification}
+							onClose={() => this.handleClose()}
+							message={message}></Snackbar>
+					</React.Fragment>
+				) : (
+					<IconButton onClick={e => this.setAnchor(e)}>
+						<NotificationsIcon />
+					</IconButton>
+				)}
 				<Menu
 					style={{ maxHeight: '600px' }}
 					open={Boolean(anchorEl)}
@@ -135,14 +186,29 @@ class UserNotifications extends Component {
 					{notifications.length === 0 ? (
 						<MenuItem onClick={() => this.handleClose()}>No notifications</MenuItem>
 					) : null}
-					{notifications.map(el => (
-						<MenuItem>
+					{notifications.map((el, idx) => (
+						<MenuItem key={idx}>
 							<ListItemIcon>
 								{el.message === 0 ? <PeopleIcon /> : <CommentIcon />}
 							</ListItemIcon>
-							{el.message === 0
-								? `user ${el.senderId} followed you`
-								: `user ${el.senderId} commented on your post`}
+							{el.message === 0 ? (
+								<React.Fragment>
+									<div>
+										User{' '}
+										<NavLink to={`/user/${el.userId}`}>{el.senderId} </NavLink>
+										followed you.
+									</div>
+								</React.Fragment>
+							) : (
+								<React.Fragment>
+									<div>
+										User{' '}
+										<NavLink to={`/user/${el.senderId}`}>{el.senderId}</NavLink>{' '}
+										commented on your{' '}
+										<NavLink to={`/recipe/${el.recipeId}`}>recipe</NavLink>.
+									</div>
+								</React.Fragment>
+							)}
 						</MenuItem>
 					))}
 				</Menu>

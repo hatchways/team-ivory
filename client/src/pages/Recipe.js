@@ -136,7 +136,7 @@ const Recipe = props => {
 			) : (
 				<div>Loading...</div>
 			)}
-			<Comments recipe={recipeArray} comments={comments} user={props.user} />
+			<Comments recipe={recipeArray} comments={comments} user={props.user} socket={props.socket} />
 			{/* // </div> */}
 		</Container>
 	);

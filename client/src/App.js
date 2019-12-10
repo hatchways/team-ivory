@@ -24,14 +24,20 @@ import './App.css';
 
 const history = createBrowserHistory();
 
+const socket = io('http://localhost:3000');
+
 class App extends Component {
 	state = { user: null };
 
 	componentDidMount() {
-		const socket = io('http://localhost:3000');
-		console.log('Socket connected', socket);
-		socket.on('outgoing data', data => {
-			socket.broadcast.emit('outgoing data', { hello: 'world' });
+		console.log('Socket', socket);
+		// socket.connect()
+		socket.on('connect', data => {
+			console.log('connected to socket');
+			console.log(socket.connected, socket.id);
+			socket.emit('woot', { hello: 'world' }, res => {
+				console.log("WOOT ", res)
+			});
 		});
 		this.updateUser();
 	}
@@ -64,7 +70,7 @@ class App extends Component {
 				<BrowserRouter>
 					<Route
 						render={props => (
-							<AppNavbar {...props} user={user} logout={() => this.logout()} />
+							<AppNavbar {...props} user={user} logout={() => this.logout()} socket={socket} />
 						)}
 					/>
 					<Route
@@ -78,7 +84,7 @@ class App extends Component {
 					<Route
 						exact
 						path="/recipe/:recipeId"
-						render={props => <Recipe {...props} user={user} />}
+						render={props => <Recipe {...props} user={user} socket={socket} />}
 					/>
 					<Route
 						exact
@@ -110,7 +116,7 @@ class App extends Component {
 						exact
 						path={`/user/:username`}
 						render={props => (
-							<User {...props} user={user} logout={() => this.logout()} />
+							<User {...props} user={user} socket={socket} logout={() => this.logout()} />
 						)}
 					/>
 				</BrowserRouter>

@@ -354,10 +354,40 @@ router.post('/followers', ensureAuthenticated, function(req, res) {
 	}
 });
 
-router.post('/notifications', ensureAuthenticated, async function(req, res) {
-	console.log('notifications route');
+router.get('/notifications', ensureAuthenticated, async function(req, res) {
+	console.log('get notifications route');
 	const notifications = await models.notifications.findAll();
 
 	res.json(notifications);
 });
+
+router.post('/notifications', ensureAuthenticated, async function(req, res) {
+	console.log('post notifications route');
+	console.log(req.body)
+
+
+	// const updateTo = req.body.favorited ? 1 : 0;
+	// const query = await models.favorites.findAll({
+	// 	where: { userId: req.body.userId, recipeId: req.body.recipeId },
+	// });
+	// if (!query[0]) {
+	// 	console.log('time to insert');
+	// 	const result = await models.favorites.create({
+	// 		userId: req.body.userId,
+	// 		recipeId: req.body.recipeId,
+	// 		favorited: 1,
+	// 	});
+	// 	res.json({ msg: 'inserted to favorites' });
+	// } else {
+	// 	console.log('time to update');
+	// 	const result = await models.favorites.update(
+	// 		{
+	// 			favorited: updateTo,
+	// 		},
+	// 		{ where: { id: query[0].dataValues.id } }
+	// 	);
+	// 	res.json({ msg: 'updated favorite' });
+	// }
+});
+
 module.exports = router;

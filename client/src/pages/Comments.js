@@ -42,7 +42,7 @@ const useStyles = makeStyles({
 	},
 });
 
-const Comments = ({ recipe, comments, user }) => {
+const Comments = ({ recipe, comments, user, socket }) => {
 	const classes = useStyles();
 	const [input, setInput] = useState('');
 	const [commentsArray, setCommentsArray] = useState(null);
@@ -55,7 +55,6 @@ const Comments = ({ recipe, comments, user }) => {
 
 	const handleSubmit = async e => {
 		e.preventDefault();
-		console.log('SUBMITTING');
 		try {
 			const res = await fetch(`/comment/post`, {
 				method: 'PUT',
@@ -68,6 +67,7 @@ const Comments = ({ recipe, comments, user }) => {
 				}),
 			});
 			const date = new Date().toString();
+
 			if (res.status === 200) {
 				const data = await res.json();
 				const newComment = {
@@ -79,6 +79,16 @@ const Comments = ({ recipe, comments, user }) => {
 					updated: date,
 					id: data.commentId,
 				};
+				console.log('USER'.user);
+
+				const notification = {
+					userId: data.userId,
+					senderId: user.id,
+					message: 1,
+					status: 0,
+				};
+				socket.emit('comment', notification, res => {
+				});
 				setCommentsArray([newComment, ...commentsArray]);
 				setInput('');
 			} else throw new Error('Error inserting comment ', res);

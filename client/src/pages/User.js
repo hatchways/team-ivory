@@ -72,6 +72,7 @@ class User extends Component {
 			lastProps.location.pathname !== this.props.location.pathname ||
 			lastProps.user != this.props.user
 		) {
+			console.log(this.props.user);
 			this.requestUser();
 			this.getRecipes();
 		}
@@ -122,6 +123,10 @@ class User extends Component {
 	}
 
 	followUser = () => {
+		const { user, socket } = this.props;
+		socket.emit('follow', { userId: user.user, message: 0 }, res => {
+			console.log('newcomment res', res);
+		});
 		fetch('/api/followers', {
 			method: 'post',
 			headers: {
