@@ -6,7 +6,7 @@ import Recipes from './Recipes';
 
 const feedPageStyle = theme => ({
 	feedContainer: {
-		margin: theme.spacing.unit * 2,
+		margin: theme.spacing(2),
 	},
 });
 
@@ -18,12 +18,13 @@ class Feed extends Component {
 		recipes: [],
 		sorted: false,
 		sortedBy: '',
-		sortDirection: '',
+		sortDirection: 'desc',
 		searched: false,
 		searchedRecipes: [],
 	};
 
 	componentDidMount() {
+		console.log(this.props);
 		fetch('api/recipes', {
 			method: 'get',
 			headers: {
@@ -85,7 +86,7 @@ class Feed extends Component {
 	};
 
 	render() {
-		const { classes, user } = this.props;
+		const { classes, user, history } = this.props;
 		const { recipes, searched, searchedRecipes, sorted, sortedBy, sortDirection } = this.state;
 		let asc = 'Ascending';
 		let desc = 'Descending';
@@ -105,7 +106,7 @@ class Feed extends Component {
 			<div className={classes.feedContainer}>
 				<input placeholder="Search by name" onChange={this.handleSearch}></input>{' '}
 				<select value={sortedBy} onChange={this.handleSort}>
-					<option value="" selected disabled>
+					<option value="" disabled>
 						Sort By
 					</option>
 					<option value="name">Name</option>
@@ -113,15 +114,18 @@ class Feed extends Component {
 					<option value="likes">Popularity</option>
 				</select>{' '}
 				<select value={sortDirection} disabled={!sorted} onChange={this.handleSort}>
-					<option value="" selected disabled>
+					<option value="" disabled>
 						Direction
 					</option>
 					<option value="asc">{asc}</option>
-					<option value="desc" selected>
-						{desc}
-					</option>
+					<option value="desc">{desc}</option>
 				</select>
-				<Recipes recipes={searched ? searchedRecipes : recipes} user={user} />
+				<Recipes
+					history={history}
+					recipes={searched ? searchedRecipes : recipes}
+					user={user}
+					socket={this.props.socket}
+				/>
 			</div>
 		);
 	}

@@ -30,15 +30,7 @@ class App extends Component {
 	state = { user: null };
 
 	componentDidMount() {
-		console.log('Socket', socket);
-		// socket.connect()
-		socket.on('connect', data => {
-			console.log('connected to socket');
-			console.log(socket.connected, socket.id);
-			socket.emit('woot', { hello: 'world' }, res => {
-				console.log("WOOT ", res)
-			});
-		});
+		console.log('Connected? ', socket.connected);
 		this.updateUser();
 	}
 
@@ -47,8 +39,14 @@ class App extends Component {
 		console.info('Updating user...');
 		const jwt = Cookies.get('jwt');
 		if (jwt) {
-			const user = atob(jwt.split('.')[1]);
-			this.setState({ user: JSON.parse(user) });
+			const user = JSON.parse(atob(jwt.split('.')[1]));
+
+			socket.on('connect', data => {
+				console.log('connected to socket');
+				socket.emit('user', user);
+			});
+
+			this.setState({ user });
 		}
 	}
 
@@ -64,13 +62,17 @@ class App extends Component {
 	render() {
 		console.log('Rerending main app.');
 		const { user } = this.state;
-		console.log('APP', user);
 		return (
 			<MuiThemeProvider theme={theme}>
 				<BrowserRouter>
 					<Route
 						render={props => (
-							<AppNavbar {...props} user={user} logout={() => this.logout()} socket={socket} />
+							<AppNavbar
+								{...props}
+								user={user}
+								logout={() => this.logout()}
+								socket={socket}
+							/>
 						)}
 					/>
 					<Route
@@ -79,7 +81,11 @@ class App extends Component {
 						render={props => <LandingPage {...props} user={user} />}
 					/>
 					<Route exact path="/builder" component={BuilderPage} />
-					<Route exact path="/feed" render={props => <Feed {...props} user={user} />} />
+					<Route
+						exact
+						path="/feed"
+						render={props => <Feed {...props} user={user} socket={socket} />}
+					/>
 					<Route exact path="/cart" component={Cart} />
 					<Route
 						exact
@@ -116,7 +122,12 @@ class App extends Component {
 						exact
 						path={`/user/:username`}
 						render={props => (
-							<User {...props} user={user} socket={socket} logout={() => this.logout()} />
+							<User
+								{...props}
+								user={user}
+								socket={socket}
+								logout={() => this.logout()}
+							/>
 						)}
 					/>
 				</BrowserRouter>

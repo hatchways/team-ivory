@@ -49,7 +49,6 @@ const Comments = ({ recipe, comments, user, socket }) => {
 	const [editCommentId, setEditCommentId] = useState(null);
 
 	useEffect(() => {
-		console.log(user);
 		setCommentsArray(comments);
 	}, [comments]);
 
@@ -67,7 +66,6 @@ const Comments = ({ recipe, comments, user, socket }) => {
 				}),
 			});
 			const date = new Date().toString();
-
 			if (res.status === 200) {
 				const data = await res.json();
 				const newComment = {
@@ -79,16 +77,15 @@ const Comments = ({ recipe, comments, user, socket }) => {
 					updated: date,
 					id: data.commentId,
 				};
-				console.log('USER'.user);
 
 				const notification = {
 					userId: data.userId,
 					senderId: user.id,
+					senderUser: user.user,
 					message: 1,
-					status: 0,
+					recipeId: recipe.id,
 				};
-				socket.emit('comment', notification, res => {
-				});
+				socket.emit('comment', notification);
 				setCommentsArray([newComment, ...commentsArray]);
 				setInput('');
 			} else throw new Error('Error inserting comment ', res);
@@ -109,7 +106,6 @@ const Comments = ({ recipe, comments, user, socket }) => {
 	// Saves changes made during edit and updates frontend
 	const saveChanges = (commentId, text) => {
 		handleEdit(null);
-		console.log(commentId, text);
 		try {
 			const res = fetch(`/comment/edit`, {
 				method: 'POST',
@@ -121,6 +117,7 @@ const Comments = ({ recipe, comments, user, socket }) => {
 					text: text,
 				}),
 			});
+			if (!res.ok) throw new Error('Unable to save changes!');
 			// Update the text in the front end
 			const newComments = commentsArray.map(comment => {
 				if (comment.id === commentId) comment.text = text;
@@ -133,8 +130,6 @@ const Comments = ({ recipe, comments, user, socket }) => {
 	};
 
 	const handleDelete = commentId => {
-		console.log(commentId);
-		// const commentId = e.target.value;
 		try {
 			const res = fetch(`/comment/delete`, {
 				method: 'DELETE',
@@ -145,6 +140,7 @@ const Comments = ({ recipe, comments, user, socket }) => {
 					id: commentId,
 				}),
 			});
+			if (!res.ok) throw new Error('Unable to delete comment!');
 			const newComments = commentsArray.filter(comment => comment.id !== parseInt(commentId));
 			setCommentsArray(newComments);
 		} catch (e) {
@@ -171,7 +167,7 @@ const Comments = ({ recipe, comments, user, socket }) => {
 				<React.Fragment>
 					<div>
 						{commentsArray.map(comment =>
-							comment.id == editCommentId ? (
+							comment.id === editCommentId ? (
 								<EditingComment
 									comment={comment}
 									save={(id, text) => saveChanges(id, text)}

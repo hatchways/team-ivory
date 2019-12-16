@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
 			userId: DataTypes.INTEGER,
 			senderId: DataTypes.INTEGER,
 			message: DataTypes.INTEGER,
-			status: DataTypes.INTEGER,
+			recipeId: DataTypes.INTEGER,
 		},
 		{}
 	);

@@ -56,53 +56,10 @@ router.get('/recipes/following', ensureAuthenticated, async (req, res, next) => 
 	);
 });
 
-// Get all all recipes
+// Get all recipes
 router.get('/recipes', getCurrentUser, async function(req, res, next) {
-	console.log('REQUEST USER: ');
-	console.log(req.user);
-
-	// Get recipes for logged in user
 	console.info('Getting recipes with favorites');
-	const recipes = await models.recipes.findAll({
-		include: [
-			{
-				model: models.ingredients,
-			},
-			{
-				model: models.favorites,
-			},
-		],
-	});
-	const result = recipes.map(recipe => {
-		// Check if user is logged in, and if so if they liked the recipe
-		const favorited = req.user
-			? recipe.dataValues.favorites.some(el => el.userId === req.user.id)
-			: false;
-		const likes = recipe.dataValues.favorites.length;
-		return {
-			id: recipe.id,
-			user: recipe.userId,
-			name: recipe.name,
-			imageUrl: recipe.image.replace('public', ''),
-			steps: recipe.steps,
-			tags: recipe.tags,
-			likes,
-			favorited,
-			created: recipe.createdAt,
-			ingredients: recipe.ingredients.map(ingredient => {
-				return {
-					ingredient: {
-						label: ingredient.name,
-					},
-					quantity: ingredient.quantity,
-					unit: {
-						label: ingredient.unit,
-					},
-				};
-			}),
-		};
-	});
-
+	const result = await queries.allRecipesWithFavorites(req.user);
 	return res.status(200).send(result);
 });
 
@@ -324,38 +281,46 @@ router.post('/followers', ensureAuthenticated, function(req, res) {
 
 router.get('/notifications', ensureAuthenticated, async function(req, res) {
 	console.log('get notifications route');
-	const notifications = await models.notifications.findAll();
+	const nlist = await models.notifications.findAll({
+		where: { userId: req.user.id },
+		order: [['createdAt', 'DESC']],
+	});
+	const notifications = await Promise.all(
+		nlist.map(async n => {
+			const { username } = await models.users.findOne({ where: { id: n.senderId } });
+			return {
+				id: n.id,
+				userId: n.userId,
+				senderId: n.senderId,
+				senderUser: username,
+				message: n.message,
+				recipeId: n.recipeId,
+			};
+		})
+	);
 
 	res.json(notifications);
 });
 
 router.post('/notifications', ensureAuthenticated, async function(req, res) {
 	console.log('post notifications route');
-	console.log(req.body)
+	const { userId, senderId, message, recipeId } = req.body;
+	const addNotification = await models.notifications.create({
+		userId,
+		senderId,
+		message,
+		recipeId,
+	});
+	res.json(addNotification);
+});
 
-
-	// const updateTo = req.body.favorited ? 1 : 0;
-	// const query = await models.favorites.findAll({
-	// 	where: { userId: req.body.userId, recipeId: req.body.recipeId },
-	// });
-	// if (!query[0]) {
-	// 	console.log('time to insert');
-	// 	const result = await models.favorites.create({
-	// 		userId: req.body.userId,
-	// 		recipeId: req.body.recipeId,
-	// 		favorited: 1,
-	// 	});
-	// 	res.json({ msg: 'inserted to favorites' });
-	// } else {
-	// 	console.log('time to update');
-	// 	const result = await models.favorites.update(
-	// 		{
-	// 			favorited: updateTo,
-	// 		},
-	// 		{ where: { id: query[0].dataValues.id } }
-	// 	);
-	// 	res.json({ msg: 'updated favorite' });
-	// }
+router.delete('/notifications/delete', ensureAuthenticated, async function(req, res) {
+	const destroy = await models.notifications.destroy({ where: { id: req.body.id } });
+	if (destroy === 0) {
+		res.sendStatus(400);
+	} else {
+		res.sendStatus(200);
+	}
 });
 
 module.exports = router;

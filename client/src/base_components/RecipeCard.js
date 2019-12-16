@@ -46,18 +46,22 @@ export default function RecipeCard(props) {
 	const [page, setPage] = useState('');
 	const [favorited, setFavorited] = useState(0);
 	const [likes, setLikes] = useState(0);
+	const [loggedIn, setLoggedIn] = useState(false);
 
 	useEffect(() => {
-		setPage(props.page);
-		setFavorited(props.recipe.favorited);
-		setLikes(props.recipe.likes);
+		// console.log(props)
+		const { user, page, recipe } = props;
+		setPage(page);
+		setFavorited(recipe.favorited);
+		setLikes(recipe.likes);
+		setLoggedIn(user ? true : false);
 	}, [props]);
 
 	const handleExpandClick = () => {
 		setExpanded(!expanded);
 	};
 
-	const handleAdToCart = () => {
+	const handleAddToCart = () => {
 		fetch('api/cart', {
 			method: 'post',
 			headers: {
@@ -77,28 +81,45 @@ export default function RecipeCard(props) {
 
 	// Updates the favorite status and handles it client side with state
 	const handleFavorite = async () => {
-		try {
-			const updateFavorite = await fetch(`/user/${props.user.user}/favorites`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					userId: props.user.id,
-					recipeId: props.recipe.id,
-					favorited: !favorited,
-				}),
-			});
-			if (updateFavorite.status === 200) {
-				if (favorited) {
-					setLikes(parseInt(likes) - 1);
-				} else {
-					setLikes(parseInt(likes) + 1);
+		const { user, recipe, socket } = props;
+
+		console.log(loggedIn);
+		if (loggedIn) {
+			try {
+				const updateFavorite = await fetch(`/user/${user.user}/favorites`, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						userId: user.id,
+						recipeId: recipe.id,
+						favorited: !favorited,
+					}),
+				});
+				if (updateFavorite.status === 200) {
+					const notification = {
+						userId: recipe.user,
+						senderId: user.id,
+						senderUser: user.user,
+						message: 2,
+						recipeId: recipe.id,
+						favorited: !favorited,
+					};
+					socket.emit('favorite', notification);
+
+					if (favorited) {
+						setLikes(parseInt(likes) - 1);
+					} else {
+						setLikes(parseInt(likes) + 1);
+					}
+					setFavorited(!favorited);
 				}
-				setFavorited(!favorited);
+			} catch (e) {
+				console.error(e);
 			}
-		} catch (e) {
-			console.error(e);
+		} else {
+			props.history.push('/login');
 		}
 	};
 
@@ -112,10 +133,10 @@ export default function RecipeCard(props) {
 						</Avatar>
 					</NavLink>
 				}
-				title={props.recipe.name}
+				title={<NavLink to={`/recipe/${props.recipe.id}`}>{props.recipe.name}</NavLink>}
 				subheader={props.recipe.created}
 				action={
-					<IconButton aria-label="settings" onClick={handleAdToCart}>
+					<IconButton aria-label="settings" onClick={handleAddToCart}>
 						<AddShoppingCartIcon />
 					</IconButton>
 				}

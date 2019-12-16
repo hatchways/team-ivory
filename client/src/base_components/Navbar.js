@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { NavLink } from 'react-router-dom';
-
 import {
 	AppBar,
 	Button,
@@ -15,6 +14,8 @@ import NotificationsIcon from '@material-ui/icons/Notifications';
 import NotificationsActiveIcon from '@material-ui/icons/NotificationsActive';
 import PeopleIcon from '@material-ui/icons/People';
 import CommentIcon from '@material-ui/icons/Comment';
+import FavoriteIcon from '@material-ui/icons/Favorite';
+import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import '../css/navbar.css';
 import { withStyles } from '@material-ui/styles';
 import Snackbar from '@material-ui/core/Snackbar';
@@ -113,24 +114,58 @@ class UserNotifications extends Component {
 
 	componentDidUpdate(prevProps) {
 		if (this.props !== prevProps) {
-			console.log(this.props);
 			const { socket } = this.props;
 			// Listens for comments by other users
 			socket.on('comment', res => {
-				this.setState({
-					notifications: [res, ...this.state.notifications],
-					newNotification: true,
-				});
+				this.handleNotifications(res);
 			});
 			// Listens for follows by others
 			socket.on('follow', res => {
-				this.setState({
-					notifications: [res, ...this.state.notifications],
-					newNotification: true,
-				});
+				this.handleNotifications(res);
 			});
-
+			// Listens for favorites by others
+			socket.on('favorite', res => {
+				if (res.favorited) {
+					this.handleNotifications(res);
+				}
+			});
 			this.setState({ notifications: this.props.notifications });
+		}
+	}
+
+	handleNotifications(n) {
+		try {
+			const res = fetch(`/api/notifications`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(n),
+			});
+			if (!res.ok) throw new Error('Unable to retrieve notification!');
+			this.setState({
+				notifications: [n, ...this.state.notifications],
+				newNotification: true,
+			});
+		} catch (e) {
+			console.log(e);
+		}
+	}
+
+	async handleDelete(id) {
+		try {
+			const res = await fetch('/api/notifications/delete', {
+				method: 'DELETE',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ id }),
+			});
+			if (!res.ok) throw new Error('Unable to delete notification!');
+			console.info('Notification deleted');
+			this.setState({ notifications: this.state.notifications.filter(n => n.id !== id) });
+		} catch (e) {
+			console.log(e);
 		}
 	}
 
@@ -147,16 +182,77 @@ class UserNotifications extends Component {
 		this.props.history.push(target);
 	}
 	render() {
-		const { anchorEl, newNotification, notifications, transition } = this.state;
-		const { user, windowWidth, classes } = this.props;
+		const { anchorEl, newNotification, notifications } = this.state;
+		// const { user, windowWidth, classes } = this.props;
 		let message;
 		if (newNotification) {
+			if (notifications[0].message === 0) {
+				message = `${notifications[0].senderUser} has followed you.`;
+			}
 			if (notifications[0].message === 1) {
-				message = `User ${notifications[0].senderId} has commented on your recipe.`;
-			} else {
-				message = `User ${notifications[0].userId} has followed you.`;
+				message = `${notifications[0].senderUser} has commented on your recipe.`;
+			}
+			if (notifications[0].message === 2) {
+				message = `${notifications[0].senderUser} liked your recipe.`;
 			}
 		}
+		// Build notification list
+		let nList;
+		nList = notifications.map((el, idx) => {
+			let div;
+			switch (el.message) {
+				case 0:
+					div = (
+						<div>
+							<ListItemIcon>
+								<PeopleIcon />
+							</ListItemIcon>
+							<NavLink to={`/user/${el.senderUser}`}>{el.senderUser} </NavLink>
+							followed you.
+							<HighlightOffIcon
+								onClick={() => this.handleDelete(el.id)}
+								fontSize="small"
+							/>
+						</div>
+					);
+					break;
+				case 1:
+					div = (
+						<div>
+							<ListItemIcon>
+								<CommentIcon />
+							</ListItemIcon>
+							<NavLink to={`/user/${el.senderUser}`}>{el.senderUser}</NavLink>{' '}
+							commented on your{' '}
+							<NavLink to={`/recipe/${el.recipeId}`}>recipe</NavLink>.
+							<HighlightOffIcon
+								onClick={() => this.handleDelete(el.id)}
+								fontSize="small"
+							/>
+						</div>
+					);
+					break;
+				case 2:
+					div = (
+						<div>
+							<ListItemIcon>
+								<FavoriteIcon />
+							</ListItemIcon>
+							<NavLink to={`/user/${el.senderUser}`}>{el.senderUser}</NavLink> liked
+							your <NavLink to={`/recipe/${el.recipeId}`}>recipe</NavLink>.
+							<HighlightOffIcon
+								onClick={() => this.handleDelete(el.id)}
+								fontSize="small"
+							/>
+						</div>
+					);
+					break;
+				default:
+					break;
+			}
+			return <MenuItem key={idx}>{div}</MenuItem>;
+		});
+
 		return (
 			<div>
 				{newNotification ? (
@@ -186,31 +282,7 @@ class UserNotifications extends Component {
 					{notifications.length === 0 ? (
 						<MenuItem onClick={() => this.handleClose()}>No notifications</MenuItem>
 					) : null}
-					{notifications.map((el, idx) => (
-						<MenuItem key={idx}>
-							<ListItemIcon>
-								{el.message === 0 ? <PeopleIcon /> : <CommentIcon />}
-							</ListItemIcon>
-							{el.message === 0 ? (
-								<React.Fragment>
-									<div>
-										User{' '}
-										<NavLink to={`/user/${el.userId}`}>{el.senderId} </NavLink>
-										followed you.
-									</div>
-								</React.Fragment>
-							) : (
-								<React.Fragment>
-									<div>
-										User{' '}
-										<NavLink to={`/user/${el.senderId}`}>{el.senderId}</NavLink>{' '}
-										commented on your{' '}
-										<NavLink to={`/recipe/${el.recipeId}`}>recipe</NavLink>.
-									</div>
-								</React.Fragment>
-							)}
-						</MenuItem>
-					))}
+					{nList}
 				</Menu>
 			</div>
 		);
@@ -250,7 +322,7 @@ class UserMenu extends Component {
 					{windowWidth < 601 ? (
 						<MenuItem onClick={() => this.navTo('/following')}>Following</MenuItem>
 					) : null}
-					<MenuItem onClick={() => this.navTo(`/user/${user.username}/favorites`)}>
+					<MenuItem onClick={() => this.navTo(`/user/${user.user}/favorites`)}>
 						Favorites
 					</MenuItem>
 					{windowWidth < 601 ? (

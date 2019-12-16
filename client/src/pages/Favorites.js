@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
-import { IconButton } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
 import RecipeCard from '../base_components/RecipeCard';
 
 const useStyles = makeStyles(theme => ({
@@ -29,6 +26,7 @@ const Favorites = ({ user }) => {
 				method: 'GET',
 			});
 			const { favorites } = await res.json();
+			console.log("FAVORITES", favorites)
 			setFetched(true);
 			setFavorites(favorites);
 		} catch (e) {

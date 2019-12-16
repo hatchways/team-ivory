@@ -5,9 +5,7 @@ import { Typography, Container, Button } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 
 const UserStyle = theme => ({
-	landingContainer: {
-		// margin: theme.spacing.unit * 2,
-	},
+	landingContainer: {},
 	userCard: {
 		position: 'relative',
 		display: 'flex',
@@ -80,9 +78,9 @@ class User extends Component {
 	componentDidUpdate(lastProps) {
 		if (
 			lastProps.location.pathname !== this.props.location.pathname ||
-			lastProps.user != this.props.user
+			lastProps.user !== this.props.user
 		) {
-			console.log(this.props.user);
+			console.log(this.props);
 			this.requestUser();
 			this.getRecipes();
 			this.getFollow();
@@ -92,24 +90,20 @@ class User extends Component {
 	// Get the user from the url and request data from server
 	async requestUser() {
 		const urlUser = this.props.location.pathname.split('/').pop();
-		console.log(this.props.user);
 		let url = this.props.user
 			? '/user/' + urlUser + '?userId=' + this.props.user.id
 			: '/user/' + urlUser;
-		console.log(url);
 		const res = await fetch(url, {
 			method: 'get',
 			headers: {
 				'Content-Type': 'application/json',
 			},
 		});
-		console.log(res);
 		if (res.status >= 400 && res.status < 500) {
 			return this.props.history.push('/login');
 		}
 		if (res.status === 200) {
 			const data = await res.json();
-			console.log(data);
 			this.setState({ ...data });
 		}
 	}
@@ -140,27 +134,23 @@ class User extends Component {
 	async signout() {
 		console.info('Signing out...');
 		const res = await fetch('/user/signout', { method: 'POST' });
-		console.log(await res.json());
+		if (!res.ok) throw new Error('Unable to signout.');
 		this.props.logout();
 		this.props.history.push('/login');
 	}
 
 	followUser = () => {
 		const { user, socket } = this.props;
-		socket.emit('follow', { userId: user.user, message: 0 }, res => {
-			console.log('newcomment res', res);
-		});
-		fetch('/api/followers', {
-			method: 'post',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({
-				followId: this.state.id,
-			}),
-		}).then(res => {
-			this.setState({ followed: true });
-		});
+		const { id } = this.state;
+		const notification = {
+			userId: id,
+			senderId: user.id,
+			senderUser: user.user,
+			message: 0,
+			recipeId: 0,
+		};
+		socket.emit('follow', notification);
+		this.setState({ followed: true });
 	};
 
 	handleImageChange(e) {
@@ -175,12 +165,13 @@ class User extends Component {
 			method: 'POST',
 			body: formData,
 		});
+		if (!res.ok) throw new Error('Unable to upload image');
 		this.setState({ upload: null });
 	};
 
 	render() {
 		const { classes, user } = this.props;
-		const { id, firstName, lastName, email, username, followers, following } = this.state;
+		const { firstName, lastName, email, username, followers, following } = this.state;
 		const urlUser = this.props.location.pathname.split('/').pop();
 		const { recipes, followed } = this.state;
 		const ownProfile = user && user.user === urlUser ? true : false;

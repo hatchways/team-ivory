@@ -110,47 +110,47 @@ router.get('/:username', (req, res, next) => {
 
 router.get('/:username/favorites', ensureAuthenticated, async (req, res) => {
 	console.log("User's favorites");
-	const recipes = await models.recipes.findAll({
-		include: [
-			{
-				model: models.ingredients,
-			},
-			{
-				model: models.favorites,
-				where: { userId: req.user.id },
-			},
-		],
-	});
-	// const favorites = await queries.usersFavorites(req.user.id);
-	const favorites = recipes.map(recipe => {
-		// Check if user is logged in, and if so if they liked the recipe
-		const favorited = req.user
-			? recipe.dataValues.favorites.some(el => el.userId === req.user.id)
-			: false;
-		const likes = recipe.dataValues.favorites.length;
-		return {
-			id: recipe.id,
-			user: recipe.userId,
-			name: recipe.name,
-			imageUrl: recipe.image.replace('public', ''),
-			steps: recipe.steps,
-			tags: recipe.tags,
-			likes,
-			favorited,
-			created: recipe.createdAt,
-			ingredients: recipe.ingredients.map(ingredient => {
-				return {
-					ingredient: {
-						label: ingredient.name,
-					},
-					quantity: ingredient.quantity,
-					unit: {
-						label: ingredient.unit,
-					},
-				};
-			}),
-		};
-	});
+	// const recipes = await models.recipes.findAll({
+	// 	include: [
+	// 		{
+	// 			model: models.ingredients,
+	// 		},
+	// 		{
+	// 			model: models.favorites,
+	// 			where: { userId: req.user.id },
+	// 		},
+	// 	],
+	// });
+	const favorites = await queries.usersFavorites(req.user.id);
+	// const favorites = recipes.map(recipe => {
+	// 	// Check if user is logged in, and if so if they liked the recipe
+	// 	const favorited = req.user
+	// 		? recipe.dataValues.favorites.some(el => el.userId === req.user.id)
+	// 		: false;
+	// 	const likes = recipe.dataValues.favorites.length;
+	// 	return {
+	// 		id: recipe.id,
+	// 		user: recipe.userId,
+	// 		name: recipe.name,
+	// 		imageUrl: recipe.image.replace('public', ''),
+	// 		steps: recipe.steps,
+	// 		tags: recipe.tags,
+	// 		likes,
+	// 		favorited,
+	// 		created: recipe.createdAt,
+	// 		ingredients: recipe.ingredients.map(ingredient => {
+	// 			return {
+	// 				ingredient: {
+	// 					label: ingredient.name,
+	// 				},
+	// 				quantity: ingredient.quantity,
+	// 				unit: {
+	// 					label: ingredient.unit,
+	// 				},
+	// 			};
+	// 		}),
+	// 	};
+	// });
 	res.json({ favorites });
 });
 
@@ -217,7 +217,6 @@ router.post('/:username/favorites/delete', ensureAuthenticated, async (req, res)
 	console.log('removing favorite');
 
 	const result = await queries.removeFavorite(req.user.id, req.body.recipeId);
-	console.log(result);
 
 	res.json(result);
 });
