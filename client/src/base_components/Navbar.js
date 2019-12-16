@@ -134,17 +134,22 @@ class UserNotifications extends Component {
 	}
 
 	handleNotifications(n) {
-		const notify = fetch(`/api/notifications`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify(n),
-		});
-		this.setState({
-			notifications: [n, ...this.state.notifications],
-			newNotification: true,
-		});
+		try {
+			const res = fetch(`/api/notifications`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(n),
+			});
+			if (!res.ok) throw new Error('Unable to retrieve notification!');
+			this.setState({
+				notifications: [n, ...this.state.notifications],
+				newNotification: true,
+			});
+		} catch (e) {
+			console.log(e);
+		}
 	}
 
 	async handleDelete(id) {
@@ -177,8 +182,8 @@ class UserNotifications extends Component {
 		this.props.history.push(target);
 	}
 	render() {
-		const { anchorEl, newNotification, notifications, transition } = this.state;
-		const { user, windowWidth, classes } = this.props;
+		const { anchorEl, newNotification, notifications } = this.state;
+		// const { user, windowWidth, classes } = this.props;
 		let message;
 		if (newNotification) {
 			if (notifications[0].message === 0) {

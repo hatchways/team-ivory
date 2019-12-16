@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Comments from './Comments';
 import { makeStyles } from '@material-ui/styles';
-import { Container, Grid, Typography, Box, Chip } from '@material-ui/core';
+import { Container, Typography, Box, Chip } from '@material-ui/core';
 import clsx from 'clsx';
 
 const useStyles = makeStyles({

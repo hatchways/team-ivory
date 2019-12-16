@@ -5,8 +5,7 @@ import { Typography, Container, Button } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 
 const UserStyle = theme => ({
-	landingContainer: {
-	},
+	landingContainer: {},
 	userCard: {
 		position: 'relative',
 		display: 'flex',
@@ -79,7 +78,7 @@ class User extends Component {
 	componentDidUpdate(lastProps) {
 		if (
 			lastProps.location.pathname !== this.props.location.pathname ||
-			lastProps.user != this.props.user
+			lastProps.user !== this.props.user
 		) {
 			console.log(this.props);
 			this.requestUser();
@@ -135,6 +134,7 @@ class User extends Component {
 	async signout() {
 		console.info('Signing out...');
 		const res = await fetch('/user/signout', { method: 'POST' });
+		if (!res.ok) throw new Error('Unable to signout.');
 		this.props.logout();
 		this.props.history.push('/login');
 	}
@@ -142,10 +142,14 @@ class User extends Component {
 	followUser = () => {
 		const { user, socket } = this.props;
 		const { id } = this.state;
-		const notification = { userId: id, senderId: user.id, senderUser: user.user, message: 0, recipeId: 0 };
-		socket.emit('follow', notification, res => {
-			console.log('sending notification to socket...');
-		});
+		const notification = {
+			userId: id,
+			senderId: user.id,
+			senderUser: user.user,
+			message: 0,
+			recipeId: 0,
+		};
+		socket.emit('follow', notification);
 		this.setState({ followed: true });
 	};
 
@@ -161,12 +165,13 @@ class User extends Component {
 			method: 'POST',
 			body: formData,
 		});
+		if (!res.ok) throw new Error('Unable to upload image');
 		this.setState({ upload: null });
 	};
 
 	render() {
 		const { classes, user } = this.props;
-		const { id, firstName, lastName, email, username, followers, following } = this.state;
+		const { firstName, lastName, email, username, followers, following } = this.state;
 		const urlUser = this.props.location.pathname.split('/').pop();
 		const { recipes, followed } = this.state;
 		const ownProfile = user && user.user === urlUser ? true : false;

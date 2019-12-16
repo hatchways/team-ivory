@@ -106,9 +106,7 @@ export default function RecipeCard(props) {
 						recipeId: recipe.id,
 						favorited: !favorited,
 					};
-					socket.emit('favorite', notification, res => {
-						console.log('sending favorite notification');
-					});
+					socket.emit('favorite', notification);
 
 					if (favorited) {
 						setLikes(parseInt(likes) - 1);

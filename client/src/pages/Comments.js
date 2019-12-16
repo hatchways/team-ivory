@@ -66,7 +66,6 @@ const Comments = ({ recipe, comments, user, socket }) => {
 				}),
 			});
 			const date = new Date().toString();
-
 			if (res.status === 200) {
 				const data = await res.json();
 				const newComment = {
@@ -86,8 +85,7 @@ const Comments = ({ recipe, comments, user, socket }) => {
 					message: 1,
 					recipeId: recipe.id,
 				};
-				socket.emit('comment', notification, res => {
-				});
+				socket.emit('comment', notification);
 				setCommentsArray([newComment, ...commentsArray]);
 				setInput('');
 			} else throw new Error('Error inserting comment ', res);
@@ -119,6 +117,7 @@ const Comments = ({ recipe, comments, user, socket }) => {
 					text: text,
 				}),
 			});
+			if (!res.ok) throw new Error('Unable to save changes!');
 			// Update the text in the front end
 			const newComments = commentsArray.map(comment => {
 				if (comment.id === commentId) comment.text = text;
@@ -141,6 +140,7 @@ const Comments = ({ recipe, comments, user, socket }) => {
 					id: commentId,
 				}),
 			});
+			if (!res.ok) throw new Error('Unable to delete comment!');
 			const newComments = commentsArray.filter(comment => comment.id !== parseInt(commentId));
 			setCommentsArray(newComments);
 		} catch (e) {
@@ -167,7 +167,7 @@ const Comments = ({ recipe, comments, user, socket }) => {
 				<React.Fragment>
 					<div>
 						{commentsArray.map(comment =>
-							comment.id == editCommentId ? (
+							comment.id === editCommentId ? (
 								<EditingComment
 									comment={comment}
 									save={(id, text) => saveChanges(id, text)}

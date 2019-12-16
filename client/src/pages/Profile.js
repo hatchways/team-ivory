@@ -6,7 +6,7 @@ const ProfileStyles = theme => ({
 	container: {
 		position: 'relative',
 		margin: theme.spacing(2),
-		margin: '20px',
+		// margin: '20px',
 		padding: '10px',
 		border: 'solid 2px #000000',
 		borderRadius: '5px',
@@ -64,7 +64,6 @@ class Profile extends Component {
 	state = {
 		editing: false,
 		fields: [],
-		editing: '',
 	};
 
 	async componentDidMount() {
