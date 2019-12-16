@@ -42,6 +42,10 @@ const UserStyle = theme => ({
 	recipe: {
 		margin: '10px',
 	},
+	upload: {
+		position: 'absolute',
+		bottom: '0px',
+	},
 	follow: {
 		position: 'absolute',
 		top: '15px',
@@ -61,6 +65,8 @@ class User extends Component {
 		following: [],
 		favorites: false,
 		followed: false,
+		upload: null,
+		image: null,
 	};
 
 	// Set up initial user
@@ -157,6 +163,21 @@ class User extends Component {
 		});
 	};
 
+	handleImageChange(e) {
+		this.setState({ upload: e.target.files[0] });
+	}
+
+	handleImageSubmit = async e => {
+		e.preventDefault();
+		const formData = new FormData();
+		formData.append('profile', this.state.upload);
+		const res = await fetch(`/user/${this.state.username}/profile/upload`, {
+			method: 'POST',
+			body: formData,
+		});
+		this.setState({ upload: null });
+	};
+
 	render() {
 		const { classes, user } = this.props;
 		const { id, firstName, lastName, email, username, followers, following } = this.state;
@@ -168,6 +189,14 @@ class User extends Component {
 			<div className={classes.landingContainer}>
 				<div className={classes.userCard}>
 					<div className={classes.profilePic}></div>
+					<div className={classes.upload}>
+						<form onSubmit={this.handleImageSubmit}>
+							<input type="file" onChange={this.handleImageChange.bind(this)} />
+							<p>
+								<button type="submit">Upload</button>
+							</p>
+						</form>
+					</div>
 					<div className={classes.userDetails}>
 						<h1>{`${firstName} ${lastName}`}</h1>
 						<label>{`@${username}`}</label>

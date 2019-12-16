@@ -3,9 +3,23 @@ const router = express.Router();
 const passport = require('passport');
 const bcrypt = require('bcrypt');
 const models = require('../models');
+var multer = require('multer');
+const path = require('path');
 const queries = require('../db/queries');
 const jwt = require('../config/jwt')['jwtManager'];
 const { ensureAuthenticated } = require('../middleware/auth');
+
+// Omage upload parameters for the user profile image
+var imageUpload = multer({
+	storage: multer.diskStorage({
+		destination: function(req, file, callback) {
+			callback(null, './public/uploads/profileImages');
+		},
+		filename: function(req, file, callback) {
+			callback(null, req.params.username + path.extname(file.originalname));
+		},
+	}),
+});
 
 router.get('/', ensureAuthenticated, (req, res, next) => {
 	console.log('user base url');
@@ -206,6 +220,11 @@ router.post('/:username/favorites/delete', ensureAuthenticated, async (req, res)
 	console.log(result);
 
 	res.json(result);
+});
+
+router.post('/:username/profile/upload', imageUpload.single('profile'), async (req, res) => {
+	console.log('uploading profile image');
+	res.json({ success: 'ok' });
 });
 
 router.post('/passwords/change', ensureAuthenticated, async (req, res, next) => {
