@@ -58,6 +58,7 @@ class User extends Component {
 		createdAt: '',
 		recipes: [],
 		followers: [],
+		following: [],
 		favorites: false,
 		followed: false,
 	};
@@ -66,7 +67,7 @@ class User extends Component {
 	componentDidMount() {
 		this.requestUser();
 		this.getRecipes();
-		this.getFollowers();
+		this.getFollow();
 	}
 
 	// Ensure user update if :user in url is updated
@@ -78,7 +79,7 @@ class User extends Component {
 			console.log(this.props.user);
 			this.requestUser();
 			this.getRecipes();
-			this.getFollowers();
+			this.getFollow();
 		}
 	}
 
@@ -118,15 +119,16 @@ class User extends Component {
 		}
 	}
 
-	// Get user's followers
-	async getFollowers() {
+	// Get user's followers and list of following
+	async getFollow() {
 		const urlUser = this.props.location.pathname.split('/').pop();
-		const res = await fetch(`/user/${urlUser}/followers`, { method: 'GET' });
-
-		if (res.status === 200) {
-			const data = await res.json();
-			this.setState({ followers: data });
-		}
+		const res = await Promise.all([
+			fetch(`/user/${urlUser}/followers`, { method: 'GET' }),
+			fetch(`/user/${urlUser}/following`, { method: 'GET' }),
+		]);
+		const followers = await res[0].json();
+		const following = await res[1].json();
+		this.setState({ followers, following });
 	}
 
 	async signout() {
@@ -157,7 +159,7 @@ class User extends Component {
 
 	render() {
 		const { classes, user } = this.props;
-		const { id, firstName, lastName, email, username, followers } = this.state;
+		const { id, firstName, lastName, email, username, followers, following } = this.state;
 		const urlUser = this.props.location.pathname.split('/').pop();
 		const { recipes, followed } = this.state;
 		const ownProfile = user && user.user === urlUser ? true : false;
@@ -175,6 +177,12 @@ class User extends Component {
 							{followers.length > 0
 								? followers.map(f => <NavLink to={`/user/${f}`}>{f} </NavLink>)
 								: 'No followers'}
+						</p>
+						<p>
+							Following:{' '}
+							{following.length > 0
+								? following.map(f => <NavLink to={`/user/${f}`}>{f} </NavLink>)
+								: 'Not following any users'}
 						</p>
 					</div>
 					{!ownProfile ? (

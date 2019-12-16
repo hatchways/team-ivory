@@ -141,7 +141,6 @@ router.get('/:username/favorites', ensureAuthenticated, async (req, res) => {
 });
 
 router.get('/:username/followers', async (req, res) => {
-	console.log('FOLLOWERS ROUTE');
 	const username = req.params.username;
 
 	const user = await models.users.findOne({ where: { username: username } });
@@ -156,6 +155,23 @@ router.get('/:username/followers', async (req, res) => {
 		})
 	);
 	res.json(followUsername);
+});
+
+router.get('/:username/following', async (req, res) => {
+	const username = req.params.username;
+
+	const user = await models.users.findOne({ where: { username: username } });
+	const { id } = user;
+	const following = await models.followers.findAll({ where: { followerId: id } });
+
+	// Find username for each user followed
+	const followingUsername = await Promise.all(
+		following.map(async follower => {
+			const { username } = await models.users.findOne({ where: { id: follower.userId } });
+			return username;
+		})
+	);
+	res.json(followingUsername);
 });
 
 router.post('/:username/favorites', ensureAuthenticated, async (req, res) => {
