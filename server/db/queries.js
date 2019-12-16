@@ -18,7 +18,7 @@ const findRecipeUser = async userId => {
 	return 'no user found';
 };
 
-const allRecipesWithFavorites = async userId => {
+const allRecipesWithFavorites = async user => {
 	const allRecipes = await models.recipes.findAll({
 		include: [
 			{ model: models.ingredients },
@@ -31,6 +31,10 @@ const allRecipesWithFavorites = async userId => {
 
 	const mappedRecipes = await Promise.all(
 		allRecipes.map(async recipe => {
+			// Check if user is logged in, and if so if they liked the recipe
+			const favorited = user
+				? recipe.dataValues.favorites.some(el => el.userId === user.id)
+				: false;
 			const username = await findRecipeUser(recipe.userId);
 			const likes = await countFavorites(recipe);
 			return {
@@ -41,17 +45,8 @@ const allRecipesWithFavorites = async userId => {
 				imageUrl: recipe.image.replace('public', ''),
 				steps: recipe.steps,
 				tags: recipe.tags,
-				//checks if there is a favorites relationship and then checks if the relationship belongs to current user
-				favorited: recipe.favorites[0]
-					? recipe.favorites.some(
-							favorite =>
-								favorite.userId === userId &&
-								favorite.favorited === 1
-					  )
-						? 1
-						: 0
-					: 0,
-				likes: likes,
+				favorited,
+				likes,
 				created: recipe.createdAt,
 				ingredients: recipe.ingredients.map(ingredient => {
 					return {

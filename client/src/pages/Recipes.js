@@ -20,6 +20,7 @@ export default function Recipes(props) {
 						key={recipe.id}
 						recipe={recipe}
 						user={props.user}
+						history={props.history}
 						page={'feed'}
 						socket={props.socket}
 						className={classes.recipeCard}

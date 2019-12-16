@@ -56,53 +56,11 @@ router.get('/recipes/following', ensureAuthenticated, async (req, res, next) => 
 	);
 });
 
-// Get all all recipes
+// Get all recipes
 router.get('/recipes', getCurrentUser, async function(req, res, next) {
-	console.log('REQUEST USER: ');
-	console.log(req.user);
-
-	// Get recipes for logged in user
 	console.info('Getting recipes with favorites');
-	const recipes = await models.recipes.findAll({
-		include: [
-			{
-				model: models.ingredients,
-			},
-			{
-				model: models.favorites,
-			},
-		],
-	});
-	const result = recipes.map(recipe => {
-		// Check if user is logged in, and if so if they liked the recipe
-		const favorited = req.user
-			? recipe.dataValues.favorites.some(el => el.userId === req.user.id)
-			: false;
-		const likes = recipe.dataValues.favorites.length;
-		return {
-			id: recipe.id,
-			user: recipe.userId,
-			name: recipe.name,
-			imageUrl: recipe.image.replace('public', ''),
-			steps: recipe.steps,
-			tags: recipe.tags,
-			likes,
-			favorited,
-			created: recipe.createdAt,
-			ingredients: recipe.ingredients.map(ingredient => {
-				return {
-					ingredient: {
-						label: ingredient.name,
-					},
-					quantity: ingredient.quantity,
-					unit: {
-						label: ingredient.unit,
-					},
-				};
-			}),
-		};
-	});
-
+	const result = await queries.allRecipesWithFavorites(req.user);
+	console.log(result);
 	return res.status(200).send(result);
 });
 
@@ -325,7 +283,6 @@ router.post('/followers', ensureAuthenticated, function(req, res) {
 router.get('/notifications', ensureAuthenticated, async function(req, res) {
 	console.log('get notifications route');
 	const nlist = await models.notifications.findAll({ order: [['createdAt', 'DESC']] });
-	console.log(nlist);
 	const notifications = await Promise.all(
 		nlist.map(async n => {
 			const { username } = await models.users.findOne({ where: { id: n.senderId } });
@@ -344,7 +301,6 @@ router.get('/notifications', ensureAuthenticated, async function(req, res) {
 
 router.post('/notifications', ensureAuthenticated, async function(req, res) {
 	console.log('post notifications route');
-	console.log(req.body);
 	const { userId, senderId, message, recipeId } = req.body;
 	const addNotification = await models.notifications.create({
 		userId,
@@ -352,7 +308,6 @@ router.post('/notifications', ensureAuthenticated, async function(req, res) {
 		message,
 		recipeId,
 	});
-	console.log(addNotification);
 	res.json(addNotification);
 });
 

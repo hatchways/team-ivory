@@ -24,6 +24,7 @@ class Feed extends Component {
 	};
 
 	componentDidMount() {
+		console.log(this.props);
 		fetch('api/recipes', {
 			method: 'get',
 			headers: {
@@ -85,7 +86,7 @@ class Feed extends Component {
 	};
 
 	render() {
-		const { classes, user } = this.props;
+		const { classes, user, history } = this.props;
 		const { recipes, searched, searchedRecipes, sorted, sortedBy, sortDirection } = this.state;
 		let asc = 'Ascending';
 		let desc = 'Descending';
@@ -121,7 +122,7 @@ class Feed extends Component {
 						{desc}
 					</option>
 				</select>
-				<Recipes recipes={searched ? searchedRecipes : recipes} user={user} socket={this.props.socket} />
+				<Recipes history={history} recipes={searched ? searchedRecipes : recipes} user={user} socket={this.props.socket} />
 			</div>
 		);
 	}
