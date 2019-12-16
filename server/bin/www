@@ -32,38 +32,34 @@ var io = require('socket.io')(server);
 /**
  * Setting up socket
  */
+const users = [];
 io.on('connection', socket => {
-	console.log('A user connected to the socket!');
+	console.log(`User ${socket.id} connected to the socket!`);
 
-	//Here we listen on a new namespace called "incoming data"
-	socket.on('incoming data', data => {
-		//Here we broadcast it out to all other sockets EXCLUDING the socket which sent us the data
-		console.log(data);
+	socket.on('user', user => {
+		users.push({ id: user.id, socket: socket.id });
 	});
 
 	socket.on('comment', (data, send) => {
 		console.log('Receiving commenting notification from client');
-		console.log(data);
-		send('Sending commenting notification to client');
-		socket.broadcast.emit('comment', data);
+		const user = users.find(user => user.id === data.userId);
+		socket.to(user.socket).emit('comment', data);
 	});
 
 	socket.on('follow', (data, send) => {
 		console.log('Receiving following notification from client');
-		console.log(data);
-		send('Sending following notification to client');
-		socket.broadcast.emit('follow', data);
+		const user = users.find(user => user.id === data.userId);
+		socket.to(user.socket).emit('follow', data);
 	});
 
 	socket.on('favorite', (data, send) => {
 		console.log('Receiving favorite notification from client');
-		console.log(data);
-		send('Sending favorite notification to client');
-		socket.broadcast.emit('favorite', data);
+		const user = users.find(user => user.id === data.userId);
+		socket.to(user.socket).emit('favorite', data);
 	});
 
 	socket.on('disconnect', () => {
-		console.log('User disconnected');
+		console.log(`User ${socket.id} disconnected!`);
 	});
 });
 

@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { NavLink } from 'react-router-dom';
-
 import {
 	AppBar,
 	Button,
@@ -16,6 +15,7 @@ import NotificationsActiveIcon from '@material-ui/icons/NotificationsActive';
 import PeopleIcon from '@material-ui/icons/People';
 import CommentIcon from '@material-ui/icons/Comment';
 import FavoriteIcon from '@material-ui/icons/Favorite';
+import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import '../css/navbar.css';
 import { withStyles } from '@material-ui/styles';
 import Snackbar from '@material-ui/core/Snackbar';
@@ -147,6 +147,23 @@ class UserNotifications extends Component {
 		});
 	}
 
+	async handleDelete(id) {
+		try {
+			const res = await fetch('/api/notifications/delete', {
+				method: 'DELETE',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ id }),
+			});
+			if (!res.ok) throw new Error('Unable to delete notification!');
+			console.info('Notification deleted');
+			this.setState({ notifications: this.state.notifications.filter(n => n.id !== id) });
+		} catch (e) {
+			console.log(e);
+		}
+	}
+
 	setAnchor(e) {
 		this.setState({ anchorEl: e.currentTarget, newNotification: false });
 	}
@@ -174,7 +191,6 @@ class UserNotifications extends Component {
 				message = `${notifications[0].senderUser} liked your recipe.`;
 			}
 		}
-
 		// Build notification list
 		let nList;
 		nList = notifications.map((el, idx) => {
@@ -188,6 +204,10 @@ class UserNotifications extends Component {
 							</ListItemIcon>
 							<NavLink to={`/user/${el.senderUser}`}>{el.senderUser} </NavLink>
 							followed you.
+							<HighlightOffIcon
+								onClick={() => this.handleDelete(el.id)}
+								fontSize="small"
+							/>
 						</div>
 					);
 					break;
@@ -200,6 +220,10 @@ class UserNotifications extends Component {
 							<NavLink to={`/user/${el.senderUser}`}>{el.senderUser}</NavLink>{' '}
 							commented on your{' '}
 							<NavLink to={`/recipe/${el.recipeId}`}>recipe</NavLink>.
+							<HighlightOffIcon
+								onClick={() => this.handleDelete(el.id)}
+								fontSize="small"
+							/>
 						</div>
 					);
 					break;
@@ -211,6 +235,10 @@ class UserNotifications extends Component {
 							</ListItemIcon>
 							<NavLink to={`/user/${el.senderUser}`}>{el.senderUser}</NavLink> liked
 							your <NavLink to={`/recipe/${el.recipeId}`}>recipe</NavLink>.
+							<HighlightOffIcon
+								onClick={() => this.handleDelete(el.id)}
+								fontSize="small"
+							/>
 						</div>
 					);
 					break;

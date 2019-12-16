@@ -281,11 +281,15 @@ router.post('/followers', ensureAuthenticated, function(req, res) {
 
 router.get('/notifications', ensureAuthenticated, async function(req, res) {
 	console.log('get notifications route');
-	const nlist = await models.notifications.findAll({ order: [['createdAt', 'DESC']] });
+	const nlist = await models.notifications.findAll({
+		where: { userId: req.user.id },
+		order: [['createdAt', 'DESC']],
+	});
 	const notifications = await Promise.all(
 		nlist.map(async n => {
 			const { username } = await models.users.findOne({ where: { id: n.senderId } });
 			return {
+				id: n.id,
 				userId: n.userId,
 				senderId: n.senderId,
 				senderUser: username,
@@ -308,6 +312,15 @@ router.post('/notifications', ensureAuthenticated, async function(req, res) {
 		recipeId,
 	});
 	res.json(addNotification);
+});
+
+router.delete('/notifications/delete', ensureAuthenticated, async function(req, res) {
+	const destroy = await models.notifications.destroy({ where: { id: req.body.id } });
+	if (destroy === 0) {
+		res.sendStatus(400);
+	} else {
+		res.sendStatus(200);
+	}
 });
 
 module.exports = router;

@@ -30,9 +30,7 @@ class App extends Component {
 	state = { user: null };
 
 	componentDidMount() {
-		socket.on('connect', data => {
-			console.log('connected to socket');
-		});
+		console.log('Connected? ', socket.connected);
 		this.updateUser();
 	}
 
@@ -41,8 +39,14 @@ class App extends Component {
 		console.info('Updating user...');
 		const jwt = Cookies.get('jwt');
 		if (jwt) {
-			const user = atob(jwt.split('.')[1]);
-			this.setState({ user: JSON.parse(user) });
+			const user = JSON.parse(atob(jwt.split('.')[1]));
+
+			socket.on('connect', data => {
+				console.log('connected to socket');
+				socket.emit('user', user);
+			});
+
+			this.setState({ user });
 		}
 	}
 
