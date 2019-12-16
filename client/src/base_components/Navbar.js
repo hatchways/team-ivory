@@ -47,7 +47,6 @@ class AppNavbar extends Component {
 		const res = await fetch('/api/notifications', { method: 'GET' });
 		let notifications = [];
 		if (res.status === 200) notifications = await res.json();
-		console.log(notifications);
 		this.setState({ notifications });
 	};
 
@@ -115,7 +114,6 @@ class UserNotifications extends Component {
 
 	componentDidUpdate(prevProps) {
 		if (this.props !== prevProps) {
-			console.log(this.props);
 			const { socket } = this.props;
 			// Listens for comments by other users
 			socket.on('comment', res => {
@@ -127,12 +125,7 @@ class UserNotifications extends Component {
 			});
 			// Listens for favorites by others
 			socket.on('favorite', res => {
-				console.log(res);
 				if (res.favorited) {
-					// this.setState({
-					// 	notifications: [res, ...this.state.notifications],
-					// 	newNotification: true,
-					// });
 					this.handleNotifications(res);
 				}
 			});
@@ -296,7 +289,7 @@ class UserMenu extends Component {
 					{windowWidth < 601 ? (
 						<MenuItem onClick={() => this.navTo('/following')}>Following</MenuItem>
 					) : null}
-					<MenuItem onClick={() => this.navTo(`/user/${user.username}/favorites`)}>
+					<MenuItem onClick={() => this.navTo(`/user/${user.user}/favorites`)}>
 						Favorites
 					</MenuItem>
 					{windowWidth < 601 ? (

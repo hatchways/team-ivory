@@ -30,11 +30,8 @@ class App extends Component {
 	state = { user: null };
 
 	componentDidMount() {
-		console.log('Socket', socket);
-		// socket.connect()
 		socket.on('connect', data => {
 			console.log('connected to socket');
-			console.log(socket.connected, socket.id);
 		});
 		this.updateUser();
 	}

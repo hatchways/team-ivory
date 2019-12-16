@@ -6,7 +6,6 @@ import { withStyles } from '@material-ui/core/styles';
 
 const UserStyle = theme => ({
 	landingContainer: {
-		// margin: theme.spacing.unit * 2,
 	},
 	userCard: {
 		position: 'relative',

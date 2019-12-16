@@ -135,7 +135,7 @@ export default function RecipeCard(props) {
 						</Avatar>
 					</NavLink>
 				}
-				title={props.recipe.name}
+				title={<NavLink to={`/recipe/${props.recipe.id}`}>{props.recipe.name}</NavLink>}
 				subheader={props.recipe.created}
 				action={
 					<IconButton aria-label="settings" onClick={handleAddToCart}>

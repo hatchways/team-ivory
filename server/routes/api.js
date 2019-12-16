@@ -60,7 +60,6 @@ router.get('/recipes/following', ensureAuthenticated, async (req, res, next) => 
 router.get('/recipes', getCurrentUser, async function(req, res, next) {
 	console.info('Getting recipes with favorites');
 	const result = await queries.allRecipesWithFavorites(req.user);
-	console.log(result);
 	return res.status(200).send(result);
 });
 

@@ -29,6 +29,7 @@ const Favorites = ({ user }) => {
 				method: 'GET',
 			});
 			const { favorites } = await res.json();
+			console.log("FAVORITES", favorites)
 			setFetched(true);
 			setFavorites(favorites);
 		} catch (e) {
