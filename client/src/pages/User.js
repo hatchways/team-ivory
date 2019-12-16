@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { NavLink } from 'react-router-dom';
 import RecipeCard from '../base_components/RecipeCard';
 import { Typography, Container, Button } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
@@ -56,6 +57,7 @@ class User extends Component {
 		last: '',
 		createdAt: '',
 		recipes: [],
+		followers: [],
 		favorites: false,
 		followed: false,
 	};
@@ -64,6 +66,7 @@ class User extends Component {
 	componentDidMount() {
 		this.requestUser();
 		this.getRecipes();
+		this.getFollowers();
 	}
 
 	// Ensure user update if :user in url is updated
@@ -75,6 +78,7 @@ class User extends Component {
 			console.log(this.props.user);
 			this.requestUser();
 			this.getRecipes();
+			this.getFollowers();
 		}
 	}
 
@@ -114,6 +118,17 @@ class User extends Component {
 		}
 	}
 
+	// Get user's followers
+	async getFollowers() {
+		const urlUser = this.props.location.pathname.split('/').pop();
+		const res = await fetch(`/user/${urlUser}/followers`, { method: 'GET' });
+
+		if (res.status === 200) {
+			const data = await res.json();
+			this.setState({ followers: data });
+		}
+	}
+
 	async signout() {
 		console.info('Signing out...');
 		const res = await fetch('/user/signout', { method: 'POST' });
@@ -142,7 +157,7 @@ class User extends Component {
 
 	render() {
 		const { classes, user } = this.props;
-		const { id, firstName, lastName, email, username } = this.state;
+		const { id, firstName, lastName, email, username, followers } = this.state;
 		const urlUser = this.props.location.pathname.split('/').pop();
 		const { recipes, followed } = this.state;
 		const ownProfile = user && user.user === urlUser ? true : false;
@@ -155,6 +170,12 @@ class User extends Component {
 						<h1>{`${firstName} ${lastName}`}</h1>
 						<label>{`@${username}`}</label>
 						<p>{`Email: ${email}`}</p>
+						<p>
+							Followers:{' '}
+							{followers.length > 0
+								? followers.map(f => <NavLink to={`/user/${f}`}>{f} </NavLink>)
+								: 'No followers'}
+						</p>
 					</div>
 					{!ownProfile ? (
 						<div className={classes.follow}>

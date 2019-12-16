@@ -140,6 +140,24 @@ router.get('/:username/favorites', ensureAuthenticated, async (req, res) => {
 	res.json({ favorites });
 });
 
+router.get('/:username/followers', async (req, res) => {
+	console.log('FOLLOWERS ROUTE');
+	const username = req.params.username;
+
+	const user = await models.users.findOne({ where: { username: username } });
+	const { id } = user;
+	const followers = await models.followers.findAll({ where: { userId: id } });
+
+	// Find username for each follower
+	const followUsername = await Promise.all(
+		followers.map(async follower => {
+			const { username } = await models.users.findOne({ where: { id: follower.followerId } });
+			return username;
+		})
+	);
+	res.json(followUsername);
+});
+
 router.post('/:username/favorites', ensureAuthenticated, async (req, res) => {
 	const updateTo = req.body.favorited ? 1 : 0;
 	const query = await models.favorites.findAll({
