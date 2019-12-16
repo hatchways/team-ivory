@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { NavLink } from 'react-router-dom';
 import RecipeCard from '../base_components/RecipeCard';
 import { Typography, Container, Button } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
@@ -41,6 +42,10 @@ const UserStyle = theme => ({
 	recipe: {
 		margin: '10px',
 	},
+	upload: {
+		position: 'absolute',
+		bottom: '0px',
+	},
 	follow: {
 		position: 'absolute',
 		top: '15px',
@@ -56,14 +61,19 @@ class User extends Component {
 		last: '',
 		createdAt: '',
 		recipes: [],
+		followers: [],
+		following: [],
 		favorites: false,
 		followed: false,
+		upload: null,
+		image: null,
 	};
 
 	// Set up initial user
 	componentDidMount() {
 		this.requestUser();
 		this.getRecipes();
+		this.getFollow();
 	}
 
 	// Ensure user update if :user in url is updated
@@ -75,6 +85,7 @@ class User extends Component {
 			console.log(this.props.user);
 			this.requestUser();
 			this.getRecipes();
+			this.getFollow();
 		}
 	}
 
@@ -114,6 +125,18 @@ class User extends Component {
 		}
 	}
 
+	// Get user's followers and list of following
+	async getFollow() {
+		const urlUser = this.props.location.pathname.split('/').pop();
+		const res = await Promise.all([
+			fetch(`/user/${urlUser}/followers`, { method: 'GET' }),
+			fetch(`/user/${urlUser}/following`, { method: 'GET' }),
+		]);
+		const followers = await res[0].json();
+		const following = await res[1].json();
+		this.setState({ followers, following });
+	}
+
 	async signout() {
 		console.info('Signing out...');
 		const res = await fetch('/user/signout', { method: 'POST' });
@@ -140,9 +163,24 @@ class User extends Component {
 		});
 	};
 
+	handleImageChange(e) {
+		this.setState({ upload: e.target.files[0] });
+	}
+
+	handleImageSubmit = async e => {
+		e.preventDefault();
+		const formData = new FormData();
+		formData.append('profile', this.state.upload);
+		const res = await fetch(`/user/${this.state.username}/profile/upload`, {
+			method: 'POST',
+			body: formData,
+		});
+		this.setState({ upload: null });
+	};
+
 	render() {
 		const { classes, user } = this.props;
-		const { id, firstName, lastName, email, username } = this.state;
+		const { id, firstName, lastName, email, username, followers, following } = this.state;
 		const urlUser = this.props.location.pathname.split('/').pop();
 		const { recipes, followed } = this.state;
 		const ownProfile = user && user.user === urlUser ? true : false;
@@ -151,10 +189,30 @@ class User extends Component {
 			<div className={classes.landingContainer}>
 				<div className={classes.userCard}>
 					<div className={classes.profilePic}></div>
+					<div className={classes.upload}>
+						<form onSubmit={this.handleImageSubmit}>
+							<input type="file" onChange={this.handleImageChange.bind(this)} />
+							<p>
+								<button type="submit">Upload</button>
+							</p>
+						</form>
+					</div>
 					<div className={classes.userDetails}>
 						<h1>{`${firstName} ${lastName}`}</h1>
 						<label>{`@${username}`}</label>
 						<p>{`Email: ${email}`}</p>
+						<p>
+							Followers:{' '}
+							{followers.length > 0
+								? followers.map(f => <NavLink to={`/user/${f}`}>{f} </NavLink>)
+								: 'No followers'}
+						</p>
+						<p>
+							Following:{' '}
+							{following.length > 0
+								? following.map(f => <NavLink to={`/user/${f}`}>{f} </NavLink>)
+								: 'Not following any users'}
+						</p>
 					</div>
 					{!ownProfile ? (
 						<div className={classes.follow}>

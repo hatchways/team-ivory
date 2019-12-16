@@ -3,9 +3,23 @@ const router = express.Router();
 const passport = require('passport');
 const bcrypt = require('bcrypt');
 const models = require('../models');
+var multer = require('multer');
+const path = require('path');
 const queries = require('../db/queries');
 const jwt = require('../config/jwt')['jwtManager'];
 const { ensureAuthenticated } = require('../middleware/auth');
+
+// Omage upload parameters for the user profile image
+var imageUpload = multer({
+	storage: multer.diskStorage({
+		destination: function(req, file, callback) {
+			callback(null, './public/uploads/profileImages');
+		},
+		filename: function(req, file, callback) {
+			callback(null, req.params.username + path.extname(file.originalname));
+		},
+	}),
+});
 
 router.get('/', ensureAuthenticated, (req, res, next) => {
 	console.log('user base url');
@@ -140,6 +154,40 @@ router.get('/:username/favorites', ensureAuthenticated, async (req, res) => {
 	res.json({ favorites });
 });
 
+router.get('/:username/followers', async (req, res) => {
+	const username = req.params.username;
+
+	const user = await models.users.findOne({ where: { username: username } });
+	const { id } = user;
+	const followers = await models.followers.findAll({ where: { userId: id } });
+
+	// Find username for each follower
+	const followUsername = await Promise.all(
+		followers.map(async follower => {
+			const { username } = await models.users.findOne({ where: { id: follower.followerId } });
+			return username;
+		})
+	);
+	res.json(followUsername);
+});
+
+router.get('/:username/following', async (req, res) => {
+	const username = req.params.username;
+
+	const user = await models.users.findOne({ where: { username: username } });
+	const { id } = user;
+	const following = await models.followers.findAll({ where: { followerId: id } });
+
+	// Find username for each user followed
+	const followingUsername = await Promise.all(
+		following.map(async follower => {
+			const { username } = await models.users.findOne({ where: { id: follower.userId } });
+			return username;
+		})
+	);
+	res.json(followingUsername);
+});
+
 router.post('/:username/favorites', ensureAuthenticated, async (req, res) => {
 	const updateTo = req.body.favorited ? 1 : 0;
 	const query = await models.favorites.findAll({
@@ -172,6 +220,11 @@ router.post('/:username/favorites/delete', ensureAuthenticated, async (req, res)
 	console.log(result);
 
 	res.json(result);
+});
+
+router.post('/:username/profile/upload', imageUpload.single('profile'), async (req, res) => {
+	console.log('uploading profile image');
+	res.json({ success: 'ok' });
 });
 
 router.post('/passwords/change', ensureAuthenticated, async (req, res, next) => {
