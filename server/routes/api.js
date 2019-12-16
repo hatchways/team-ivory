@@ -324,38 +324,36 @@ router.post('/followers', ensureAuthenticated, function(req, res) {
 
 router.get('/notifications', ensureAuthenticated, async function(req, res) {
 	console.log('get notifications route');
-	const notifications = await models.notifications.findAll();
+	const nlist = await models.notifications.findAll({ order: [['createdAt', 'DESC']] });
+	console.log(nlist);
+	const notifications = await Promise.all(
+		nlist.map(async n => {
+			const { username } = await models.users.findOne({ where: { id: n.senderId } });
+			return {
+				userId: n.userId,
+				senderId: n.senderId,
+				senderUser: username,
+				message: n.message,
+				recipeId: n.recipeId,
+			};
+		})
+	);
 
 	res.json(notifications);
 });
 
 router.post('/notifications', ensureAuthenticated, async function(req, res) {
 	console.log('post notifications route');
-	console.log(req.body)
-
-
-	// const updateTo = req.body.favorited ? 1 : 0;
-	// const query = await models.favorites.findAll({
-	// 	where: { userId: req.body.userId, recipeId: req.body.recipeId },
-	// });
-	// if (!query[0]) {
-	// 	console.log('time to insert');
-	// 	const result = await models.favorites.create({
-	// 		userId: req.body.userId,
-	// 		recipeId: req.body.recipeId,
-	// 		favorited: 1,
-	// 	});
-	// 	res.json({ msg: 'inserted to favorites' });
-	// } else {
-	// 	console.log('time to update');
-	// 	const result = await models.favorites.update(
-	// 		{
-	// 			favorited: updateTo,
-	// 		},
-	// 		{ where: { id: query[0].dataValues.id } }
-	// 	);
-	// 	res.json({ msg: 'updated favorite' });
-	// }
+	console.log(req.body);
+	const { userId, senderId, message, recipeId } = req.body;
+	const addNotification = await models.notifications.create({
+		userId,
+		senderId,
+		message,
+		recipeId,
+	});
+	console.log(addNotification);
+	res.json(addNotification);
 });
 
 module.exports = router;

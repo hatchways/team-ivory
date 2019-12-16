@@ -41,26 +41,27 @@ io.on('connection', socket => {
 		console.log(data);
 	});
 
-	socket.on('woot', (data, send) => {
-		console.log("SOCKET WOOT WOOT WOOT");
-		console.log(data);
-		send('WOOOHOOOOO');
-	})
-
 	socket.on('comment', (data, send) => {
-		console.log("COMMENT SOCKET SERVER");
+		console.log('Receiving commenting notification from client');
 		console.log(data);
-		send('SENT THE COMMENT');
-		socket.broadcast.emit('comment', data)
-	})
+		send('Sending commenting notification to client');
+		socket.broadcast.emit('comment', data);
+	});
 
 	socket.on('follow', (data, send) => {
-		console.log("FOLLOW SOCKET SERVER");
+		console.log('Receiving following notification from client');
 		console.log(data);
-		send('SENT THE FOLLOW');
-		socket.broadcast.emit('follow', data)
-	})
-	
+		send('Sending following notification to client');
+		socket.broadcast.emit('follow', data);
+	});
+
+	socket.on('favorite', (data, send) => {
+		console.log('Receiving favorite notification from client');
+		console.log(data);
+		send('Sending favorite notification to client');
+		socket.broadcast.emit('favorite', data);
+	});
+
 	socket.on('disconnect', () => {
 		console.log('User disconnected');
 	});

@@ -82,7 +82,7 @@ class User extends Component {
 			lastProps.location.pathname !== this.props.location.pathname ||
 			lastProps.user != this.props.user
 		) {
-			console.log(this.props.user);
+			console.log(this.props);
 			this.requestUser();
 			this.getRecipes();
 			this.getFollow();
@@ -92,24 +92,20 @@ class User extends Component {
 	// Get the user from the url and request data from server
 	async requestUser() {
 		const urlUser = this.props.location.pathname.split('/').pop();
-		console.log(this.props.user);
 		let url = this.props.user
 			? '/user/' + urlUser + '?userId=' + this.props.user.id
 			: '/user/' + urlUser;
-		console.log(url);
 		const res = await fetch(url, {
 			method: 'get',
 			headers: {
 				'Content-Type': 'application/json',
 			},
 		});
-		console.log(res);
 		if (res.status >= 400 && res.status < 500) {
 			return this.props.history.push('/login');
 		}
 		if (res.status === 200) {
 			const data = await res.json();
-			console.log(data);
 			this.setState({ ...data });
 		}
 	}
@@ -140,27 +136,18 @@ class User extends Component {
 	async signout() {
 		console.info('Signing out...');
 		const res = await fetch('/user/signout', { method: 'POST' });
-		console.log(await res.json());
 		this.props.logout();
 		this.props.history.push('/login');
 	}
 
 	followUser = () => {
 		const { user, socket } = this.props;
-		socket.emit('follow', { userId: user.user, message: 0 }, res => {
-			console.log('newcomment res', res);
+		const { id } = this.state;
+		const notification = { userId: id, senderId: user.id, senderUser: user.user, message: 0, recipeId: 0 };
+		socket.emit('follow', notification, res => {
+			console.log('sending notification to socket...');
 		});
-		fetch('/api/followers', {
-			method: 'post',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({
-				followId: this.state.id,
-			}),
-		}).then(res => {
-			this.setState({ followed: true });
-		});
+		this.setState({ followed: true });
 	};
 
 	handleImageChange(e) {

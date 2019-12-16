@@ -21,6 +21,7 @@ export default function Recipes(props) {
 						recipe={recipe}
 						user={props.user}
 						page={'feed'}
+						socket={props.socket}
 						className={classes.recipeCard}
 					/>
 			  ))

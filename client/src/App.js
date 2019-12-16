@@ -35,9 +35,6 @@ class App extends Component {
 		socket.on('connect', data => {
 			console.log('connected to socket');
 			console.log(socket.connected, socket.id);
-			socket.emit('woot', { hello: 'world' }, res => {
-				console.log("WOOT ", res)
-			});
 		});
 		this.updateUser();
 	}
@@ -64,13 +61,17 @@ class App extends Component {
 	render() {
 		console.log('Rerending main app.');
 		const { user } = this.state;
-		console.log('APP', user);
 		return (
 			<MuiThemeProvider theme={theme}>
 				<BrowserRouter>
 					<Route
 						render={props => (
-							<AppNavbar {...props} user={user} logout={() => this.logout()} socket={socket} />
+							<AppNavbar
+								{...props}
+								user={user}
+								logout={() => this.logout()}
+								socket={socket}
+							/>
 						)}
 					/>
 					<Route
@@ -79,7 +80,11 @@ class App extends Component {
 						render={props => <LandingPage {...props} user={user} />}
 					/>
 					<Route exact path="/builder" component={BuilderPage} />
-					<Route exact path="/feed" render={props => <Feed {...props} user={user} />} />
+					<Route
+						exact
+						path="/feed"
+						render={props => <Feed {...props} user={user} socket={socket} />}
+					/>
 					<Route exact path="/cart" component={Cart} />
 					<Route
 						exact
@@ -116,7 +121,12 @@ class App extends Component {
 						exact
 						path={`/user/:username`}
 						render={props => (
-							<User {...props} user={user} socket={socket} logout={() => this.logout()} />
+							<User
+								{...props}
+								user={user}
+								socket={socket}
+								logout={() => this.logout()}
+							/>
 						)}
 					/>
 				</BrowserRouter>

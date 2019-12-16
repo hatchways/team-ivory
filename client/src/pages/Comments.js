@@ -49,7 +49,6 @@ const Comments = ({ recipe, comments, user, socket }) => {
 	const [editCommentId, setEditCommentId] = useState(null);
 
 	useEffect(() => {
-		console.log(user);
 		setCommentsArray(comments);
 	}, [comments]);
 
@@ -79,13 +78,13 @@ const Comments = ({ recipe, comments, user, socket }) => {
 					updated: date,
 					id: data.commentId,
 				};
-				console.log('USER'.user);
 
 				const notification = {
 					userId: data.userId,
 					senderId: user.id,
+					senderUser: user.user,
 					message: 1,
-					status: 0,
+					recipeId: recipe.id,
 				};
 				socket.emit('comment', notification, res => {
 				});
@@ -109,7 +108,6 @@ const Comments = ({ recipe, comments, user, socket }) => {
 	// Saves changes made during edit and updates frontend
 	const saveChanges = (commentId, text) => {
 		handleEdit(null);
-		console.log(commentId, text);
 		try {
 			const res = fetch(`/comment/edit`, {
 				method: 'POST',
@@ -133,8 +131,6 @@ const Comments = ({ recipe, comments, user, socket }) => {
 	};
 
 	const handleDelete = commentId => {
-		console.log(commentId);
-		// const commentId = e.target.value;
 		try {
 			const res = fetch(`/comment/delete`, {
 				method: 'DELETE',

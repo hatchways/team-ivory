@@ -121,7 +121,7 @@ class Feed extends Component {
 						{desc}
 					</option>
 				</select>
-				<Recipes recipes={searched ? searchedRecipes : recipes} user={user} />
+				<Recipes recipes={searched ? searchedRecipes : recipes} user={user} socket={this.props.socket} />
 			</div>
 		);
 	}

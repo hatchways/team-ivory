@@ -51,13 +51,14 @@ export default function RecipeCard(props) {
 		setPage(props.page);
 		setFavorited(props.recipe.favorited);
 		setLikes(props.recipe.likes);
+		console.log(props)
 	}, [props]);
 
 	const handleExpandClick = () => {
 		setExpanded(!expanded);
 	};
 
-	const handleAdToCart = () => {
+	const handleAddToCart = () => {
 		fetch('api/cart', {
 			method: 'post',
 			headers: {
@@ -77,19 +78,32 @@ export default function RecipeCard(props) {
 
 	// Updates the favorite status and handles it client side with state
 	const handleFavorite = async () => {
+		const { user, recipe, socket } = props;
 		try {
-			const updateFavorite = await fetch(`/user/${props.user.user}/favorites`, {
+			const updateFavorite = await fetch(`/user/${user.user}/favorites`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify({
-					userId: props.user.id,
-					recipeId: props.recipe.id,
+					userId: user.id,
+					recipeId: recipe.id,
 					favorited: !favorited,
 				}),
 			});
 			if (updateFavorite.status === 200) {
+				const notification = {
+					userId: recipe.user,
+					senderId: user.id,
+					senderUser: user.user,
+					message: 2,
+					recipeId: recipe.id,
+					favorited: !favorited
+				};
+				socket.emit('favorite', notification, res => {
+					console.log("sending favorite notification")
+				});
+
 				if (favorited) {
 					setLikes(parseInt(likes) - 1);
 				} else {
@@ -115,7 +129,7 @@ export default function RecipeCard(props) {
 				title={props.recipe.name}
 				subheader={props.recipe.created}
 				action={
-					<IconButton aria-label="settings" onClick={handleAdToCart}>
+					<IconButton aria-label="settings" onClick={handleAddToCart}>
 						<AddShoppingCartIcon />
 					</IconButton>
 				}
