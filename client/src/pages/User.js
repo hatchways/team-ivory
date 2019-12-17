@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 import RecipeCard from '../base_components/RecipeCard';
 import { Typography, Container, Button } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
+import Modal from '@material-ui/core/Modal';
 
 const UserStyle = theme => ({
 	landingContainer: {},
@@ -32,6 +33,18 @@ const UserStyle = theme => ({
 		'border-radius': '50%',
 		border: '2px solid #000000',
 	},
+	modalCard: {
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'center',
+		margin: 'auto',
+	},
+	modalPic: {
+		width: '250px',
+		height: '250px',
+		borderRadius: '50%',
+		border: '1px solid #000000',
+	},
 	recipes: {
 		display: 'flex',
 		flexDirection: 'column',
@@ -40,14 +53,31 @@ const UserStyle = theme => ({
 	recipe: {
 		margin: '10px',
 	},
-	upload: {
-		position: 'absolute',
-		bottom: '0px',
-	},
 	follow: {
 		position: 'absolute',
 		top: '15px',
 		right: '20px',
+	},
+	upload: {
+		position: 'absolute',
+		bottom: '50px',
+		left: '60px',
+	},
+	paper: {
+		position: 'absolute',
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'center',
+		width: 400,
+		height: 400,
+		backgroundColor: theme.palette.background.paper,
+		border: '2px solid #000',
+		boxShadow: theme.shadows[5],
+		padding: theme.spacing(2, 4, 3),
+		top: '50%',
+		left: '50%',
+		// marginRight: '-50%',
+		transform: 'translate(-50%, -50%)',
 	},
 });
 
@@ -58,29 +88,23 @@ class User extends Component {
 		first: '',
 		last: '',
 		createdAt: '',
+		image: '',
 		recipes: [],
 		followers: [],
 		following: [],
 		favorites: false,
 		followed: false,
-		upload: null,
-		image: null,
+		loading: false,
 	};
-
-	// Set up initial user
 	componentDidMount() {
-		this.requestUser();
-		this.getRecipes();
-		this.getFollow();
+		this.setState({ loading: true });
 	}
-
 	// Ensure user update if :user in url is updated
 	componentDidUpdate(lastProps) {
 		if (
 			lastProps.location.pathname !== this.props.location.pathname ||
 			lastProps.user !== this.props.user
 		) {
-			console.log(this.props);
 			this.requestUser();
 			this.getRecipes();
 			this.getFollow();
@@ -128,7 +152,7 @@ class User extends Component {
 		]);
 		const followers = await res[0].json();
 		const following = await res[1].json();
-		this.setState({ followers, following });
+		this.setState({ followers, following, loading: false });
 	}
 
 	async signout() {
@@ -153,85 +177,186 @@ class User extends Component {
 		this.setState({ followed: true });
 	};
 
-	handleImageChange(e) {
-		this.setState({ upload: e.target.files[0] });
-	}
-
-	handleImageSubmit = async e => {
-		e.preventDefault();
-		const formData = new FormData();
-		formData.append('profile', this.state.upload);
-		const res = await fetch(`/user/${this.state.username}/profile/upload`, {
-			method: 'POST',
-			body: formData,
-		});
-		if (!res.ok) throw new Error('Unable to upload image');
-		this.setState({ upload: null });
+	updateImage = image => {
+		this.setState({ image });
 	};
 
 	render() {
 		const { classes, user } = this.props;
-		const { firstName, lastName, email, username, followers, following } = this.state;
+		const {
+			firstName,
+			lastName,
+			email,
+			username,
+			image,
+			followers,
+			following,
+			loading,
+		} = this.state;
 		const urlUser = this.props.location.pathname.split('/').pop();
 		const { recipes, followed } = this.state;
 		const ownProfile = user && user.user === urlUser ? true : false;
 
 		return (
 			<div className={classes.landingContainer}>
-				<div className={classes.userCard}>
-					<div className={classes.profilePic}></div>
-					<div className={classes.upload}>
-						<form onSubmit={this.handleImageSubmit}>
-							<input type="file" onChange={this.handleImageChange.bind(this)} />
-							<p>
-								<button type="submit">Upload</button>
-							</p>
-						</form>
+				{!loading ? (
+					<div>
+						<div className={classes.userCard}>
+							<img className={classes.profilePic} src={image} alt="" />
+							<ProfilePicModal
+								classes={classes}
+								image={image}
+								username={username}
+								updateImage={this.updateImage}
+							/>
+							<div className={classes.userDetails}>
+								<h1>{`${firstName} ${lastName}`}</h1>
+								<label>{`@${username}`}</label>
+								<p>{`Email: ${email}`}</p>
+								<p>
+									Followers:{' '}
+									{followers.length > 0
+										? followers.map(f => (
+												<NavLink to={`/user/${f}`}>{f} </NavLink>
+										  ))
+										: 'No followers'}
+								</p>
+								<p>
+									Following:{' '}
+									{following.length > 0
+										? following.map(f => (
+												<NavLink to={`/user/${f}`}>{f} </NavLink>
+										  ))
+										: 'Not following any users'}
+								</p>
+							</div>
+							{!ownProfile ? (
+								<div className={classes.follow}>
+									{followed ? (
+										<Typography>Followed</Typography>
+									) : (
+										<Button
+											variant="contained"
+											color="secondary"
+											onClick={this.followUser}>
+											Follow
+										</Button>
+									)}
+								</div>
+							) : null}
+						</div>
+						<Container className={classes.recipes}>
+							<h2>{`${firstName}'s recipes:`}</h2>
+							<div className={classes.userRecipes}>
+								{recipes.length > 0 ? (
+									recipes.map(recipe => (
+										<RecipeCard recipe={recipe} className={classes.recipe} />
+									))
+								) : (
+									<label>This user hasn't posted any recipes yet</label>
+								)}
+							</div>
+						</Container>
 					</div>
-					<div className={classes.userDetails}>
-						<h1>{`${firstName} ${lastName}`}</h1>
-						<label>{`@${username}`}</label>
-						<p>{`Email: ${email}`}</p>
-						<p>
-							Followers:{' '}
-							{followers.length > 0
-								? followers.map(f => <NavLink to={`/user/${f}`}>{f} </NavLink>)
-								: 'No followers'}
-						</p>
-						<p>
-							Following:{' '}
-							{following.length > 0
-								? following.map(f => <NavLink to={`/user/${f}`}>{f} </NavLink>)
-								: 'Not following any users'}
-						</p>
-					</div>
-					{!ownProfile ? (
-						<div className={classes.follow}>
-							{followed ? (
-								<Typography>Followed</Typography>
+				) : (
+					<div>Loading...</div>
+				)}
+			</div>
+		);
+	}
+}
+
+class ProfilePicModal extends Component {
+	state = {
+		username: '',
+		open: false,
+		success: false,
+		file: null,
+		image: '',
+	};
+
+	componentDidUpdate(lastProps) {
+		if (lastProps !== this.props) {
+			this.setState({ ...this.props });
+		}
+	}
+	handleOpen = () => {
+		this.setState({ open: true });
+	};
+
+	handleClose = () => {
+		this.setState({ open: false, success: false });
+	};
+
+	handleImageChange = e => {
+		this.setState({ success: false, file: e.target.files[0] });
+	};
+
+	handleImageSubmit = async e => {
+		e.preventDefault();
+		const { username, file } = this.state;
+		const type = file.name.split('.')[1];
+		const body = { username, type };
+		try {
+			// Fetch signed URL
+			const res = await fetch(`/user/${username}/profile/upload`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(body),
+			});
+			if (!res.ok) throw new Error('Unable to upload image');
+			const { returnData } = await res.json();
+			this.props.updateImage(returnData.url);
+
+			// Upload to S3 with signed URL
+			const amazonRes = await fetch(returnData.signedRequest, {
+				method: 'PUT',
+				headers: { 'Content-Type': `image/${type}` },
+				body: file,
+			});
+			if (!amazonRes.ok) throw new Error('Unable to upload image.');
+			this.setState({ success: true, image: returnData.url });
+		} catch (e) {
+			console.error(e);
+		}
+	};
+
+	render() {
+		const { classes } = this.props;
+		const { open, success, file, image } = this.state;
+		return (
+			<div className={classes.upload}>
+				<button type="button" onClick={this.handleOpen}>
+					Edit
+				</button>
+				<Modal
+					aria-labelledby="simple-modal-title"
+					aria-describedby="simple-modal-description"
+					open={open}
+					onClose={this.handleClose}>
+					<div className={classes.paper}>
+						<div className={classes.modalCard}>
+							<h4 id="simple-modal-title">Edit Your Profile Picture</h4>
+							<img className={classes.modalPic} src={image} alt="" />
+							{success ? (
+								<p>Success!</p>
 							) : (
-								<Button
-									variant="contained"
-									color="secondary"
-									onClick={this.followUser}>
-									Follow
-								</Button>
+								<form onSubmit={this.handleImageSubmit}>
+									<input type="file" onChange={this.handleImageChange} />
+									{file ? (
+										<p>
+											<button type="submit">Upload</button>
+										</p>
+									) : (
+										''
+									)}
+								</form>
 							)}
 						</div>
-					) : null}
-				</div>
-				<Container className={classes.recipes}>
-					<h2>{`${firstName}'s recipes:`}</h2>
-					<div className={classes.userRecipes}>
-						{recipes.length > 0 ? (
-							recipes.map(recipe => (
-								<RecipeCard recipe={recipe} className={classes.recipe} />
-							))
-						) : (
-							<label>This user hasn't posted any recipes yet</label>
-						)}
 					</div>
-				</Container>
+				</Modal>
 			</div>
 		);
 	}

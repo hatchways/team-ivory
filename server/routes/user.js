@@ -1,24 +1,20 @@
+require('dotenv').config();
 const express = require('express');
 const router = express.Router();
-const passport = require('passport');
 const bcrypt = require('bcrypt');
 const models = require('../models');
-var multer = require('multer');
+const aws = require('aws-sdk');
 const path = require('path');
 const queries = require('../db/queries');
 const jwt = require('../config/jwt')['jwtManager'];
 const { ensureAuthenticated } = require('../middleware/auth');
 
-// Omage upload parameters for the user profile image
-var imageUpload = multer({
-	storage: multer.diskStorage({
-		destination: function(req, file, callback) {
-			callback(null, './public/uploads/profileImages');
-		},
-		filename: function(req, file, callback) {
-			callback(null, req.params.username + path.extname(file.originalname));
-		},
-	}),
+const { AWSAccessKeyId, AWSSecretKey, S3_Bucket } = process.env;
+aws.config.update({
+	region: 'us-east-2', // Put your aws region here
+	accessKeyId: AWSAccessKeyId,
+	secretAccessKey: AWSSecretKey,
+	signatureVersion: 'v4',
 });
 
 router.get('/', ensureAuthenticated, (req, res, next) => {
@@ -49,6 +45,7 @@ router.get('/:username', (req, res, next) => {
 	console.log(req.params);
 	models.users.findOne({ where: { username: req.params.username } }).then(user => {
 		if (user) {
+			console.log(user);
 			if (req.query.userId) {
 				return models.followers
 					.findOne({
@@ -58,14 +55,7 @@ router.get('/:username', (req, res, next) => {
 						},
 					})
 					.then(follower => {
-						const {
-							id,
-							username,
-							firstName,
-							lastName,
-							createdAt,
-							email,
-						} = user.dataValues;
+						const { id, username, firstName, lastName, createdAt, image, email } = user;
 						if (follower) {
 							console.log('follower');
 							return res.status(200).send({
@@ -74,6 +64,7 @@ router.get('/:username', (req, res, next) => {
 								firstName,
 								lastName,
 								createdAt,
+								image,
 								email,
 								followed: true,
 							});
@@ -85,20 +76,21 @@ router.get('/:username', (req, res, next) => {
 								firstName,
 								lastName,
 								createdAt,
+								image,
 								email,
 								followed: false,
 							});
 						}
 					});
 			} else {
-				console.log(user.dataValues);
-				const { id, username, firstName, lastName, createdAt, email } = user.dataValues;
+				const { id, username, firstName, lastName, createdAt, image, email } = user;
 				return res.status(200).send({
 					id,
 					username,
 					firstName,
 					lastName,
 					createdAt,
+					image,
 					email,
 					followed: false,
 				});
@@ -221,9 +213,35 @@ router.post('/:username/favorites/delete', ensureAuthenticated, async (req, res)
 	res.json(result);
 });
 
-router.post('/:username/profile/upload', imageUpload.single('profile'), async (req, res) => {
+router.post('/:username/profile/upload', ensureAuthenticated, async (req, res) => {
 	console.log('uploading profile image');
-	res.json({ success: 'ok' });
+	const s3 = new aws.S3(); // Create a new instance of S3
+	const { username, type } = req.body;
+	// S3 API payload
+	const s3Params = {
+		Bucket: S3_Bucket,
+		Key: `images/${username}.${type}`,
+		Expires: 500,
+		ContentType: `image/${type}`,
+		ACL: 'public-read',
+	};
+	// Make a request to the S3 API to get a signed payload
+	s3.getSignedUrl('putObject', s3Params, async (err, data) => {
+		if (err) {
+			console.log(err);
+			res.json({ success: false, error: err });
+		}
+
+		const returnData = {
+			signedRequest: data,
+			url: `https://${S3_Bucket}.s3.amazonaws.com/images/${username}.${type}`,
+		};
+		
+		models.users.update({ image: returnData.url }, { where: { id: req.user.id } });
+
+		// Return signed payload
+		res.json({ success: true, returnData });
+	});
 });
 
 router.post('/passwords/change', ensureAuthenticated, async (req, res, next) => {

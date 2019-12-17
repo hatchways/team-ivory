@@ -43,7 +43,6 @@ class AppNavbar extends Component {
 	}
 
 	handleNotifications = async () => {
-		console.log('clicked notifications');
 		const res = await fetch('/api/notifications', { method: 'GET' });
 		let notifications = [];
 		if (res.status === 200) notifications = await res.json();

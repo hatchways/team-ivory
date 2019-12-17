@@ -30,7 +30,7 @@ class App extends Component {
 	state = { user: null };
 
 	componentDidMount() {
-		console.log('Connected? ', socket.connected);
+		console.log('Socket connected? ', socket.connected);
 		this.updateUser();
 	}
 
@@ -42,7 +42,7 @@ class App extends Component {
 			const user = JSON.parse(atob(jwt.split('.')[1]));
 
 			socket.on('connect', data => {
-				console.log('connected to socket');
+				console.log('Now connected to socket', socket.connected);
 				socket.emit('user', user);
 			});
 
