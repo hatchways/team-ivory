@@ -19,7 +19,6 @@ const findRecipeUser = async userId => {
 };
 
 const allRecipesWithFavorites = async user => {
-	console.log('USERSUSERUSERUSEURSUE', user ? 'yes' : 'no');
 	const allRecipes = await models.recipes.findAll({
 		include: [
 			{ model: models.ingredients },
