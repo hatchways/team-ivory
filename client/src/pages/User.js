@@ -94,11 +94,16 @@ class User extends Component {
 		following: [],
 		favorites: false,
 		followed: false,
-		loading: false,
+		loading: true,
 	};
+
+	// Initialize user on login
 	componentDidMount() {
-		this.setState({ loading: true });
+		this.requestUser();
+		this.getRecipes();
+		this.getFollow();
 	}
+	
 	// Ensure user update if :user in url is updated
 	componentDidUpdate(lastProps) {
 		if (
